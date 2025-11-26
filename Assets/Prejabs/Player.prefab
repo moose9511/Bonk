@@ -277,7 +277,8 @@ MonoBehaviour:
   moveSpeed: 10
   jumpSpeed: 5
   hitboxOffset: 0.8
-  forceDampen: 0.7
+  forceDampen: 0.5
+  gravity: -14.81
 --- !u!136 &3266946542563700516
 CapsuleCollider:
   m_ObjectHideFlags: 0

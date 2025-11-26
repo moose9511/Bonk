@@ -21,6 +21,7 @@ public class PlayerMovement2 : NetworkBehaviour
     private Vector3 correction;
 
     private Vector3 lastMove = new Vector3(1, 0, 1);
+    private Vector3 movement;
     private Collider col;
     public override void OnNetworkSpawn()
     {
@@ -40,13 +41,13 @@ public class PlayerMovement2 : NetworkBehaviour
         }
 
         // gets movement direction 
-        Vector3 movement = transform.forward * vInput + transform.right * hInput;
+        movement = transform.forward * vInput + transform.right * hInput;
 
         // gets last movement direction for slope calculation
         if (movement != Vector3.zero)
             lastMove = movement;
 
-        SetGroundMovement();
+        ApplyGroundMotion();
         bodyColliders = Physics.OverlapSphere(transform.position, .6f, LayerMask.GetMask("Ground"));
 
         // if player is touching ground reset fall speed and allow jump
@@ -78,7 +79,9 @@ public class PlayerMovement2 : NetworkBehaviour
 
         ColliderExtensions.GetPenetrationInLayer(col, LayerMask.GetMask("Ground"), out correction);
         transform.position += correction;
-        
+        //if(correction != Vector3.zero)
+        //    Debug.Log("correction" + correction);
+
         transform.position += ((movement * moveSpeed + extraForce) * Time.deltaTime);
 
         //Debug.Log(extraForce);
@@ -91,10 +94,14 @@ public class PlayerMovement2 : NetworkBehaviour
 
     private void DampenExtraForce()
     {
-        if(Mathf.Abs(extraForce.x) > 0)
+        if(Mathf.Abs(extraForce.x) > 1f)
             extraForce.x -= extraForce.x / forceDampen * Time.deltaTime;
-        if (Mathf.Abs(extraForce.z) > 0)
+        else
+            extraForce.x = 0;   
+        if (Mathf.Abs(extraForce.z) > 1f)
             extraForce.z -= extraForce.z / forceDampen * Time.deltaTime;
+        else
+            extraForce.z = 0;
 
     }
 
@@ -103,7 +110,9 @@ public class PlayerMovement2 : NetworkBehaviour
         // ground check, at a certain angle the player is not grounded
         Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
 
-        float angle = Vector3.Angle(lastMove + Vector3.ProjectOnPlane(extraForce, transform.up), groundHit.normal);
+        float angle = Vector3.Angle(lastMove, groundHit.normal);
+
+        Debug.Log("angle" + Vector3.Angle(Vector3.ProjectOnPlane(extraForce, transform.up), groundHit.normal) + " force" + Vector3.ProjectOnPlane(extraForce, transform.up));
 
         if (groundHit.collider != null && Mathf.Abs(angle - 90) < 40)
         {
@@ -112,10 +121,34 @@ public class PlayerMovement2 : NetworkBehaviour
             // slope movement calculation
             if (vInput != 0 || hInput != 0)
                 extraForce += Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * moveSpeed * transform.up;
-
         }
         else
             isGrounded = false;
+    }
+
+    private void ApplyGroundMotion()
+    {
+        Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
+        Vector3 horForce = Vector3.ProjectOnPlane(extraForce, transform.up);
+
+        float angle = Vector3.Angle(horForce + lastMove, groundHit.normal);
+
+        if (groundHit.collider != null && Mathf.Abs(angle - 90) < 40)
+        {
+            isGrounded = true;
+
+            if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
+            {
+
+                Debug.Log((horForce + lastMove).magnitude);
+                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad * 10000f) * (horForce + lastMove).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
+                Debug.Log(extraForce);
+            } else
+                extraForce = Vector3.zero;
+        }
+        else
+            isGrounded = false;
+
     }
 
     private ObstacleSpeed GroundedEvent()
@@ -123,8 +156,7 @@ public class PlayerMovement2 : NetworkBehaviour
         ObstacleSpeed groundSpeed = null;
         if (isGrounded)
         {
-            if()
-            extraForce = Vector3.ProjectOnPlane(extraForce, transform.up);
+            //extraForce = Vector3.ProjectOnPlane(extraForce, transform.up);
             groundSpeed = groundHit.collider.GetComponent<ObstacleSpeed>();
 
             // jump input
