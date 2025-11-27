@@ -55,27 +55,28 @@ public class PlayerMovement2 : NetworkBehaviour
         ObstacleSpeed groundSpeed = GroundedEvent();
 
         // gets speed of either an obstacle htting the player or the ground the player is standing on
-        if(bodyColliders != null)
+        obstacleHit = new RaycastHit();
+		if (bodyColliders.Length > 0)
             FindWallCollider(bodyColliders, out obstacleHit);
 
         ObstacleSpeed bodySpeed = null;
         if (obstacleHit.collider != null)
-        {
             bodySpeed = obstacleHit.collider.GetComponent<ObstacleSpeed>();
-        }
         
 
         // prioritizes body collisions over ground collisions
         if (bodySpeed != null)
         {
-            
-            if ((obstacleHit.normal + obstacleHit.collider.transform.position).magnitude > obstacleHit.collider.transform.position.magnitude)
-            {
-                Debug.Log("hit normal" + obstacleHit.normal + " body pos" + obstacleHit.collider.transform.position);
-                extraForce += bodySpeed.getVelocity();
-            }
-        }
-        else if (groundSpeed != null)
+            Debug.Log("body speed applied");
+			Vector3 normalDiff = bodySpeed.getVelocity().normalized - transform.position.normalized;
+            Vector3 speed = bodySpeed.getVelocity();
+            Vector3 scaled = Vector3.Scale(normalDiff, speed);
+
+            if(scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
+				extraForce += speed - scaled;
+
+		}
+        else if (groundSpeed != null && extraForce.magnitude < groundSpeed.getVelocity().magnitude)
             extraForce += groundSpeed.getVelocity();
 
         // removes extraforce in direction of walls
@@ -112,25 +113,6 @@ public class PlayerMovement2 : NetworkBehaviour
 
     }
 
-    private void SetGroundMovement()
-    {
-        // ground check, at a certain angle the player is not grounded
-        Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
-
-        float angle = Vector3.Angle(lastMove, groundHit.normal);
-
-        if (groundHit.collider != null && Mathf.Abs(angle - 90) < 40)
-        {
-            isGrounded = true;
-
-            // slope movement calculation
-            if (vInput != 0 || hInput != 0)
-                extraForce += Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * moveSpeed * transform.up;
-        }
-        else
-            isGrounded = false;
-    }
-
     private void ApplyGroundMotion()
     {
         Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
@@ -144,7 +126,7 @@ public class PlayerMovement2 : NetworkBehaviour
 
             if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
             {
-                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
+                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
             } else
             {
                 extraForce = Vector3.zero;
