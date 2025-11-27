@@ -17,6 +17,7 @@ public class PlayerMovement2 : NetworkBehaviour
 
     private bool isGrounded;
     private RaycastHit groundHit;
+    private RaycastHit obstacleHit;
     private Collider[] bodyColliders;
     private Vector3 correction;
 
@@ -54,17 +55,23 @@ public class PlayerMovement2 : NetworkBehaviour
         ObstacleSpeed groundSpeed = GroundedEvent();
 
         // gets speed of either an obstacle htting the player or the ground the player is standing on
-        Collider wallCollider = FindWallCollider(bodyColliders);
+        if(bodyColliders != null)
+            FindWallCollider(bodyColliders, out obstacleHit);
+
         ObstacleSpeed bodySpeed = null;
-        if (wallCollider != null)
-            bodySpeed = wallCollider.GetComponent<ObstacleSpeed>();
+        if (obstacleHit.collider != null)
+        {
+            bodySpeed = obstacleHit.collider.GetComponent<ObstacleSpeed>();
+        }
         
 
         // prioritizes body collisions over ground collisions
         if (bodySpeed != null)
         {
-            if (Mathf.Abs(Vector3.Magnitude(bodySpeed.getVelocity() + transform.position)) > Vector3.Magnitude(transform.position))
+            
+            if ((obstacleHit.normal + obstacleHit.collider.transform.position).magnitude > obstacleHit.collider.transform.position.magnitude)
             {
+                Debug.Log("hit normal" + obstacleHit.normal + " body pos" + obstacleHit.collider.transform.position);
                 extraForce += bodySpeed.getVelocity();
             }
         }
@@ -112,8 +119,6 @@ public class PlayerMovement2 : NetworkBehaviour
 
         float angle = Vector3.Angle(lastMove, groundHit.normal);
 
-        Debug.Log("angle" + Vector3.Angle(Vector3.ProjectOnPlane(extraForce, transform.up), groundHit.normal) + " force" + Vector3.ProjectOnPlane(extraForce, transform.up));
-
         if (groundHit.collider != null && Mathf.Abs(angle - 90) < 40)
         {
             isGrounded = true;
@@ -139,12 +144,12 @@ public class PlayerMovement2 : NetworkBehaviour
 
             if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
             {
-
-                Debug.Log((horForce + lastMove).magnitude);
-                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad * 10000f) * (horForce + lastMove).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
-                Debug.Log(extraForce);
+                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
             } else
+            {
                 extraForce = Vector3.zero;
+            }
+                
         }
         else
             isGrounded = false;
@@ -169,16 +174,22 @@ public class PlayerMovement2 : NetworkBehaviour
         return groundSpeed;
     }
 
-    private Collider FindWallCollider(Collider[] bodyColliders)
+    private void FindWallCollider(Collider[] bodyColliders, out RaycastHit hitInfo)
     {
         foreach (Collider target in bodyColliders)
         {
             if (target.GetComponent<ObstacleSpeed>())
             {
-                return target;
+                Physics.Raycast(transform.position, (target.transform.position - transform.position).normalized, out RaycastHit hit, Mathf.Infinity);
+                if (hit.collider != target)
+                    continue;
+
+                hitInfo = hit;
+                return;
             }
         }
-        return null;
+
+        hitInfo = new RaycastHit();
 
     }
     private void OnDrawGizmos()
