@@ -33,18 +33,8 @@ public class PlayerMovement2 : NetworkBehaviour
         stats = GetComponent<Stats>();
         cameraMovement = GetComponentInChildren<CameraMovement>();
 
-        StartCoroutine(flipGravity());
     }
 
-    private IEnumerator flipGravity()
-    {
-        Debug.Log("flipping gravity in 15 seconds");
-        yield return new WaitForSeconds(15f);
-        Debug.Log("gravity flipped");
-        transform.localEulerAngles += new Vector3(90, 0, 0);
-
-        StartCoroutine(flipGravity());
-    }
     void Update()
     {
         if (!IsOwner) return;
@@ -52,8 +42,12 @@ public class PlayerMovement2 : NetworkBehaviour
         vInput = Input.GetAxisRaw("Vertical");
         hInput = Input.GetAxisRaw("Horizontal");
 
-        // prevents faster diagonal movement
-        if (Mathf.Abs(hInput) == 1 && Mathf.Abs(vInput) == 1)
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            transform.Rotate(transform.right, 90f);
+		}
+		// prevents faster diagonal movement
+		if (Mathf.Abs(hInput) == 1 && Mathf.Abs(vInput) == 1)
         {
             hInput *= .7071f;
             vInput *= .7071f;
@@ -197,7 +191,12 @@ public class PlayerMovement2 : NetworkBehaviour
         hitInfo = new RaycastHit();
 
     }
-    private void OnDrawGizmos()
+
+    public void AddForce(Vector3 force)
+    {
+        extraForce += force;
+	}
+	private void OnDrawGizmos()
     {
         //Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
         Gizmos.DrawRay(transform.position, lastMove);

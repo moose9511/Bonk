@@ -6,8 +6,6 @@ public class CameraMovement : NetworkBehaviour
     private float xrot, yrot;
     private float lastXRot, lastYRot;
 
-    private Vector3 camRotation, parentRotation;
-
     NetworkVariable<float> sensitivity = new(3f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     void Update()
     {
@@ -15,13 +13,14 @@ public class CameraMovement : NetworkBehaviour
 
         float mousex = Input.GetAxis("Mouse X") * sensitivity.Value;
         float mousey = Input.GetAxis("Mouse Y") * sensitivity.Value;
-        
-        camRotation = transform.up * mousex + transform.right * mousey;
 
-        cam.transform.localEulerAngles += camRotation;
-        transform.transform.localEulerAngles += Vector3.ProjectOnPlane(camRotation, transform.up);
+        xrot -= mousey;
+        xrot = Mathf.Clamp(xrot, -90f, 90f);
 
-        lastXRot = mousex;
+		cam.transform.localEulerAngles = new Vector3(xrot, 0, 0);
+		transform.Rotate(new Vector3(0, mousex, 0));  
+
+		lastXRot = mousex;
         lastYRot = mousey;
     }
 
@@ -29,7 +28,8 @@ public class CameraMovement : NetworkBehaviour
     {
         cam = GetComponentInChildren<Camera>();
 
-        Cursor.lockState = CursorLockMode.Locked;
+        transform.position += new Vector3(0, 1.5f, 0);
+		Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         xrot = cam.transform.localEulerAngles.x;
