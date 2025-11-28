@@ -4,8 +4,9 @@ public class CameraMovement : NetworkBehaviour
 {
     private Camera cam;
     private float xrot, yrot;
-    private float lastXRot, lastYRot;  
+    private float lastXRot, lastYRot;
 
+    private Vector3 camRotation, parentRotation;
 
     NetworkVariable<float> sensitivity = new(3f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     void Update()
@@ -15,13 +16,10 @@ public class CameraMovement : NetworkBehaviour
         float mousex = Input.GetAxis("Mouse X") * sensitivity.Value;
         float mousey = Input.GetAxis("Mouse Y") * sensitivity.Value;
         
-        xrot -= mousey;
-        xrot = Mathf.Clamp(xrot, -90f, 90f);
+        camRotation = transform.up * mousex + transform.right * mousey;
 
-        yrot += mousex;
-
-        cam.transform.localEulerAngles = new Vector3(xrot, 0, 0);
-        transform.localRotation = Quaternion.Euler(transform.rotation.x, 0, transform.rotation.z) * Quaternion.Euler(0, yrot, 0);
+        cam.transform.localEulerAngles += camRotation;
+        transform.transform.localEulerAngles += Vector3.ProjectOnPlane(camRotation, transform.up);
 
         lastXRot = mousex;
         lastYRot = mousey;
