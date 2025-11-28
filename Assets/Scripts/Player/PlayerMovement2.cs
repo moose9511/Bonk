@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using System.Net;
+using System.Collections;
 
 public class PlayerMovement2 : NetworkBehaviour
 {
@@ -13,7 +14,6 @@ public class PlayerMovement2 : NetworkBehaviour
     [SerializeField] private float forceDampen = 1f;
     [SerializeField] private float gravity = -14.81f;
     private Vector3 extraForce = Vector3.zero;
-    
 
     private bool isGrounded;
     private RaycastHit groundHit;
@@ -24,13 +24,31 @@ public class PlayerMovement2 : NetworkBehaviour
     private Vector3 lastMove = new Vector3(1, 0, 1);
     private Vector3 movement;
     private Collider col;
+    private Stats stats;
+    private CameraMovement cameraMovement;
+
     public override void OnNetworkSpawn()
     {
         col = GetComponent<Collider>();
+        stats = GetComponent<Stats>();
+        cameraMovement = GetComponentInChildren<CameraMovement>();
+
+        StartCoroutine(flipGravity());
     }
 
-    void FixedUpdate()
+    private IEnumerator flipGravity()
     {
+        Debug.Log("flipping gravity in 15 seconds");
+        yield return new WaitForSeconds(15f);
+        Debug.Log("gravity flipped");
+        transform.localEulerAngles += new Vector3(90, 0, 0);
+
+        StartCoroutine(flipGravity());
+    }
+    void Update()
+    {
+        if (!IsOwner) return;
+
         vInput = Input.GetAxisRaw("Vertical");
         hInput = Input.GetAxisRaw("Horizontal");
 
@@ -82,17 +100,20 @@ public class PlayerMovement2 : NetworkBehaviour
         // removes extraforce in direction of walls
         if (extraForce.magnitude > 0 && Physics.SphereCast(transform.position, .5f, extraForce.normalized, out RaycastHit hitInfo, .3f))
         {
+            Vector3 stoppingForce = extraForce;
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
+            stoppingForce -= extraForce;
+
+            Debug.Log("stopping force applied: " + stoppingForce.magnitude);
+            
+            stats.TakeDamage(stoppingForce.magnitude);
         }
 
         ColliderExtensions.GetPenetrationInLayer(col, LayerMask.GetMask("Ground"), out correction);
         transform.position += correction;
-        //if(correction != Vector3.zero)
-        //    Debug.Log("correction" + correction);
 
         transform.position += ((movement * moveSpeed + extraForce) * Time.deltaTime);
 
-        //Debug.Log(extraForce);
         if (isGrounded)
             forceDampen = .7f;
         else
@@ -113,6 +134,7 @@ public class PlayerMovement2 : NetworkBehaviour
 
     }
 
+    // handles movement based on the angle of the ground
     private void ApplyGroundMotion()
     {
         Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
@@ -131,13 +153,13 @@ public class PlayerMovement2 : NetworkBehaviour
             {
                 extraForce = Vector3.zero;
             }
-                
         }
         else
             isGrounded = false;
 
     }
 
+    // handles jump and gravity application
     private ObstacleSpeed GroundedEvent()
     {
         ObstacleSpeed groundSpeed = null;
@@ -156,6 +178,7 @@ public class PlayerMovement2 : NetworkBehaviour
         return groundSpeed;
     }
 
+    // finds the collider of a wall the player is touching
     private void FindWallCollider(Collider[] bodyColliders, out RaycastHit hitInfo)
     {
         foreach (Collider target in bodyColliders)
