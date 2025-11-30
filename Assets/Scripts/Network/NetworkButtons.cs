@@ -13,16 +13,14 @@ public class NetworkButtons : MonoBehaviour
         hostBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartHost();
-            enabled = false;
         });
-        serverBtn.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartServer();
-        });
+        //serverBtn.onClick.AddListener(() =>
+        //{
+        //    NetworkManager.Singleton.StartServer();
+        //});
         clientBtn.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartClient();
-            enabled = false;
         });
     }
 

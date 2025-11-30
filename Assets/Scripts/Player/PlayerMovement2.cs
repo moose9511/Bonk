@@ -79,7 +79,6 @@ public class PlayerMovement2 : NetworkBehaviour
         // prioritizes body collisions over ground collisions
         if (bodySpeed != null)
         {
-            Debug.Log("body speed applied");
 			Vector3 normalDiff = bodySpeed.getVelocity().normalized - transform.position.normalized;
             Vector3 speed = bodySpeed.getVelocity();
             Vector3 scaled = Vector3.Scale(normalDiff, speed);
@@ -98,8 +97,6 @@ public class PlayerMovement2 : NetworkBehaviour
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
             stoppingForce -= extraForce;
 
-            Debug.Log("stopping force applied: " + stoppingForce.magnitude);
-            
             stats.TakeDamage(stoppingForce.magnitude);
         }
 

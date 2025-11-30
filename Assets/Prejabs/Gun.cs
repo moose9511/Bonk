@@ -5,4 +5,6 @@ public class Gun : ScriptableObject
 {
     [SerializeField] private Mesh gunMesh;
     [SerializeField] private Projectile projectilePrefab;
+
+
 }
