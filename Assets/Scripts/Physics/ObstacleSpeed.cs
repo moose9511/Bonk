@@ -1,8 +1,9 @@
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Netcode;
 
-public class ObstacleSpeed : MonoBehaviour
+public class ObstacleSpeed : NetworkBehaviour
 {
     Vector3 startPos;
     Vector3 lastPos;

@@ -22,6 +22,10 @@ public class NetworkButtons : MonoBehaviour
         {
             NetworkManager.Singleton.StartClient();
         });
+
+        NetworkManager.Singleton.OnClientConnectedCallback += (id) => {
+            Debug.Log($"Client {id} connected");
+        };
     }
 
 }
