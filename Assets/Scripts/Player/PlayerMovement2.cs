@@ -21,7 +21,7 @@ public class PlayerMovement2 : NetworkBehaviour
     private Collider[] bodyColliders;
     private Vector3 correction;
 
-    private Vector3 lastMove = new Vector3(1, 0, 1);
+    private Vector3 lastMove = new(1, 0, 1);
     private Vector3 movement;
     private Collider col;
     private Stats stats;
