@@ -150,8 +150,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   direction: {x: 0, y: 0, z: 0}
-  power: 0
+  power: 2
   radius: 0
+  lifetime: 15
 --- !u!114 &3659349079675384930
 MonoBehaviour:
   m_ObjectHideFlags: 0

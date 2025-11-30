@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
 
 public class Projectile : NetworkBehaviour
 {
@@ -8,12 +9,15 @@ public class Projectile : NetworkBehaviour
     public Vector3 direction;
     public float power;
     public float radius;
+    public float lifetime = 15f;
 
     Collider[] colliders;
-	public override void OnNetworkSpawn()
-    {
 
-	}
+    private IEnumerator die()
+    {
+        yield return new WaitForSeconds(lifetime);
+        Destroy(gameObject);
+    }
 
     public void SetStats(float projSpeed, Vector3 projDirection, float projPower, float projRadius)
     {
