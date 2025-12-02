@@ -21,7 +21,7 @@ public class Projectile : NetworkBehaviour
     }
 
     public override void OnNetworkSpawn()
-    {z
+    {
         ground = LayerMask.NameToLayer("Ground");
         StartCoroutine(die());
     }
