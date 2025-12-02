@@ -20,8 +20,8 @@ public class Projectile : NetworkBehaviour
         Destroy(gameObject);
     }
 
-    private void Awake()
-    {
+    public override void OnNetworkSpawn()
+    {z
         ground = LayerMask.NameToLayer("Ground");
         StartCoroutine(die());
     }
@@ -49,7 +49,6 @@ public class Projectile : NetworkBehaviour
         {
             if (hit != null)
             {
-                Debug.Log(LayerMask.NameToLayer("Ground"));
                 if (hit.gameObject.CompareTag("Player"))
                 {
                     hit.gameObject.GetComponent<PlayerMovement2>() ? .AddForce(direction * power);

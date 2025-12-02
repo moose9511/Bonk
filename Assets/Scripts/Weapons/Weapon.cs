@@ -25,7 +25,7 @@ public class Weapon : ScriptableObject
         }
 
         projectilePrefab.GetComponent<Projectile>().direction = direction;
-        Projectile projectile = Instantiate(projectilePrefab, shootPoint.position + direction, Quaternion.identity);
+        Projectile projectile = Instantiate(projectilePrefab, shootPoint.position + direction * 1.1f, Quaternion.identity);
     }
 
 }
