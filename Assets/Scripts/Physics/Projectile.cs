@@ -13,10 +13,24 @@ public class Projectile : NetworkBehaviour
 
     Collider[] colliders;
 
+    private static LayerMask ground;
     private IEnumerator die()
     {
         yield return new WaitForSeconds(lifetime);
         Destroy(gameObject);
+    }
+
+    private void Awake()
+    {
+        ground = LayerMask.NameToLayer("Ground");
+        StartCoroutine(die());
+    }
+
+    public void SetStats(float projSpeed, float projPower, float projRadius)
+    {
+        speed = projSpeed;
+        power = projPower;
+        radius = projRadius;
     }
 
     public void SetStats(float projSpeed, Vector3 projDirection, float projPower, float projRadius)
@@ -28,16 +42,23 @@ public class Projectile : NetworkBehaviour
     }
 	void Update()
     {
-        transform.Translate(direction * speed * Time.deltaTime);
+        transform.Translate(speed * Time.deltaTime * direction);
         colliders = Physics.OverlapSphere(transform.position, radius);
 
         foreach (Collider hit in colliders)
         {
-            if (hit != null && hit.gameObject.CompareTag("Player"))
+            if (hit != null)
             {
-                hit.gameObject.GetComponent<PlayerMovement2>() ? .AddForce(direction * power);
-                Destroy(gameObject);
-			}
+                Debug.Log(LayerMask.NameToLayer("Ground"));
+                if (hit.gameObject.CompareTag("Player"))
+                {
+                    hit.gameObject.GetComponent<PlayerMovement2>() ? .AddForce(direction * power);
+                    Destroy(gameObject);
+                } else if (hit.gameObject.layer == ground)
+                {
+                    Destroy(gameObject);
+                }
+            }
 		}
 	}
 }

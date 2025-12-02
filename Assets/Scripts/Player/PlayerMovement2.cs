@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using System.Net;
 using System.Collections;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public class PlayerMovement2 : NetworkBehaviour
 {
@@ -24,13 +25,13 @@ public class PlayerMovement2 : NetworkBehaviour
     private Vector3 lastMove = new(1, 0, 1);
     private Vector3 movement;
     private Collider col;
-    private Stats stats;
+    private Player player;
     private CameraMovement cameraMovement;
 
     public override void OnNetworkSpawn()
     {
         col = GetComponent<Collider>();
-        stats = GetComponent<Stats>();
+        player = GetComponent<Player>();
         cameraMovement = GetComponentInChildren<CameraMovement>();
 
     }
@@ -88,7 +89,11 @@ public class PlayerMovement2 : NetworkBehaviour
 
 		}
         else if (groundSpeed != null && extraForce.magnitude < groundSpeed.getVelocity().magnitude)
-            extraForce += groundSpeed.getVelocity();
+        {
+            if(extraForce.magnitude < groundSpeed.getVelocity().magnitude)
+                extraForce += groundSpeed.getVelocity();
+        }
+            
 
         // removes extraforce in direction of walls
         if (extraForce.magnitude > 0 && Physics.SphereCast(transform.position, .5f, extraForce.normalized, out RaycastHit hitInfo, .3f))
@@ -97,7 +102,7 @@ public class PlayerMovement2 : NetworkBehaviour
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
             stoppingForce -= extraForce;
 
-            stats.TakeDamage(stoppingForce.magnitude);
+            player.TakeDamage(stoppingForce.magnitude);
         }
 
         ColliderExtensions.GetPenetrationInLayer(col, LayerMask.GetMask("Ground"), out correction);
@@ -112,6 +117,7 @@ public class PlayerMovement2 : NetworkBehaviour
         DampenExtraForce();
     }
 
+    // constatly dampens extra force applied to the player, dampen force changes based on if the player is grounded
     private void DampenExtraForce()
     {
         if(Mathf.Abs(extraForce.x) > 1f)
@@ -129,21 +135,43 @@ public class PlayerMovement2 : NetworkBehaviour
     private void ApplyGroundMotion()
     {
         Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
-        Vector3 horForce = Vector3.ProjectOnPlane(extraForce, transform.up);
 
-        float angle = Vector3.Angle(horForce + lastMove, groundHit.normal);
-
-        if (groundHit.collider != null && Mathf.Abs(angle - 90) < 40)
+        if (groundHit.collider == null)
         {
+            isGrounded = false;
+            return;
+        }
+
+        Vector3 horForce = Vector3.ProjectOnPlane(extraForce, transform.up);
+        Vector3 groundNormal = groundHit.normal;
+
+        float angle = Vector3.Angle(Vector3.Normalize(horForce + lastMove), groundNormal);
+
+        if (angle >= 90f)
+        {
+            Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
+            extraForce = slopeDirection;
             isGrounded = true;
 
-            if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
+            //if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
+            //{
+            //    Vector3 dir = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
+            //    extraForce = dir;   
+            //} else
+            //{
+            //    extraForce = Vector3.zero;
+            //}
+        } else if (angle < 90f && angle > 40f)
+        {
+            Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
+            if (slopeDirection.y < gravity)
             {
-                extraForce = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
-            } else
-            {
-                extraForce = Vector3.zero;
+                isGrounded = false;
+                return;
             }
+
+            extraForce = slopeDirection;
+            isGrounded = true;
         }
         else
             isGrounded = false;
