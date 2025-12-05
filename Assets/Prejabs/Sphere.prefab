@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2883923847055349321}
   - component: {fileID: 6844278529860405873}
   - component: {fileID: 7146441869891428955}
-  - component: {fileID: 3659349079675384930}
+  - component: {fileID: -6635172324034907393}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -149,11 +149,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  direction: {x: 0, y: 0, z: 0}
-  power: 2
-  radius: 0
+  direction: {x: -0.7395617, y: -0.28903115, z: 1.812222}
+  power: 1
+  radius: 1
   lifetime: 15
---- !u!114 &3659349079675384930
+--- !u!114 &-6635172324034907393
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -162,11 +162,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6782282220976112871}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Script: {fileID: 11500000, guid: df2868252ab5c4d1da357e8f11f1b524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
+  NetworkTransformExpanded: 1
   AutoOwnerAuthorityTickOffset: 1
   PositionInterpolationType: 0
   RotationInterpolationType: 0
