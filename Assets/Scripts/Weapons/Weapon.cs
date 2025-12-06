@@ -35,10 +35,10 @@ public class Weapon : ScriptableObject
 class Projectile : NetworkBehaviour
 {
     private Collider[] colliders;
-    private GameObject ground;
 
     private Weapon weapon;
     private Vector3 direction;
+    private LayerMask groundMask;
     private IEnumerator die()
     {
         yield return new WaitForSeconds(weapon.lifeTime);
@@ -48,7 +48,7 @@ class Projectile : NetworkBehaviour
     {
         this.weapon = weapon;
         this.direction = direction;
-        ground.layer = LayerMask.NameToLayer("Ground");
+        groundMask = LayerMask.GetMask("Ground");
 
         if(weapon == null)
         {
@@ -66,13 +66,13 @@ class Projectile : NetworkBehaviour
         {
             if (hit != null)
             {
-                Debug.Log(LayerMask.Equals(hit.gameObject.layer, ground.layer) + " | " + hit.gameObject.layer + " | " + ground.layer);
+                Debug.Log(LayerMask.Equals(hit.gameObject.layer, groundMask) + " | " + hit.gameObject.layer + " | " + groundMask );
                 if (hit.gameObject.CompareTag("Player"))
                 {
                     hit.gameObject.GetComponent<PlayerMovement2>()?.AddForce(direction * weapon.strength);
                     hit.gameObject.GetComponent<Player>()? .TakeDamage(weapon.damage);
                     Destroy(gameObject);
-                } else if (LayerMask.Equals(hit.gameObject.layer, ground.layer))
+                } else if (LayerMask.Equals(hit.gameObject.layer, groundMask))
                 {
                     Destroy(gameObject);
                 }
