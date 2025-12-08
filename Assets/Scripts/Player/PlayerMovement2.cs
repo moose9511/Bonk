@@ -102,7 +102,7 @@ public class PlayerMovement2 : NetworkBehaviour
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
             stoppingForce -= extraForce;
 
-            player.TakeDamage(stoppingForce.magnitude);
+            player.TakeDamageServerRpc(stoppingForce.magnitude);
         }
 
         ColliderExtensions.GetPenetrationInLayer(col, LayerMask.GetMask("Ground"), out correction);

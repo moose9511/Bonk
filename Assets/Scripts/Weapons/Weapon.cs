@@ -3,8 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.VisualScripting;
 
-[CreateAssetMenu(fileName = "Weapon", menuName = "Scriptable Objects/Weapon")]
-public class Weapon : ScriptableObject
+public class Weapon : NetworkBehaviour
 {
     [SerializeField] private Mesh weaponMesh;
     [SerializeField] private GameObject projPrefab;
@@ -24,7 +23,6 @@ public class Weapon : ScriptableObject
 
         if(obj == null)
         {
-            Debug.Log("how");
             return;
         }
         obj.GetComponent<Projectile>().Init(this, direction);
@@ -70,7 +68,7 @@ class Projectile : NetworkBehaviour
                 if (hit.gameObject.CompareTag("Player"))
                 {
                     hit.gameObject.GetComponent<PlayerMovement2>()?.AddForce(direction * weapon.strength);
-                    hit.gameObject.GetComponent<Player>()? .TakeDamage(weapon.damage);
+                    hit.gameObject.GetComponent<Player>()? .TakeDamageServerRpc(weapon.damage);
                     Destroy(gameObject);
                 } else if (LayerMask.Equals(hit.gameObject.layer, groundMask))
                 {

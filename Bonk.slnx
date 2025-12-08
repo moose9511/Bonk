@@ -5,7 +5,7 @@
   <Project Path="Unity.PlasticSCM.Editor.csproj" />
   <Project Path="Unity.InputSystem.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Common.csproj" />
-  <Project Path="Unity.2D.Sprite.Editor.csproj" />
+  <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1.csproj" />
   <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetStatsMonitor.Configuration.csproj" />
   <Project Path="Unity.Multiplayer.Tools.MetricTypes.csproj" />
@@ -36,7 +36,6 @@
   <Project Path="Unity.PerformanceTesting.csproj" />
   <Project Path="Unity.VisualScripting.State.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetVis.Editor.Visualization.csproj" />
-  <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1.csproj" />
   <Project Path="Unity.Performance.Profile-Analyzer.Editor.csproj" />
   <Project Path="com.unity.multiplayer.tools.window.csproj" />
   <Project Path="UnityEditor.UI.csproj" />
@@ -60,6 +59,7 @@
   <Project Path="Unity.Multiplayer.Tools.NetStatsReporting.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
+  <Project Path="Unity.2D.Sprite.Editor.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1WithUtp2.csproj" />
   <Project Path="Unity.Multiplayer.Center.Common.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetworkSolutionInterface.csproj" />

@@ -3,11 +3,13 @@ using Unity.Netcode;
 
 public class Pickup : NetworkBehaviour
 {
-    public Weapon contents;
+    public NetworkObject contents;
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (!IsServer) return;
+
         Collider[] colliders = Physics.OverlapSphere(transform.position, 1f);
 
         foreach (Collider col in colliders)
@@ -15,13 +17,21 @@ public class Pickup : NetworkBehaviour
             Player player = col.GetComponent<Player>();
             if (player != null && player.IsOwner)
             {
-                player.GiveWeapon(contents);
-                Destroy(gameObject);
+                // spawns weapon
+				NetworkObject spawnedWeapon = Instantiate(contents, player.transform);
+                spawnedWeapon.Spawn();
+
+                // gives player the weapon
+				player.GiveWeaponServerRpc(spawnedWeapon);
+
+                // destroys pickup
+                spawnedWeapon.Despawn();
+                gameObject.GetComponent<NetworkObject>().Despawn();
             }
         }
     }
 
-    public void AddWeapon(Weapon weapon)
+    public void AddWeapon(NetworkObject weapon)
     {
         contents = weapon;
     }
