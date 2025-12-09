@@ -5,24 +5,31 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
 	// health text
-    [SerializeField] private TextMeshProUGUI healthText;
+	[SerializeField] private GameObject canvas;
+
+	[SerializeField] private TextMeshProUGUI healthText;
 
     [SerializeField] private GameObject cam;
+	[SerializeField] private GameObject gun;
 
 	// health
     private NetworkVariable<float> health = new(
-		100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-	// weapon reference
-	private NetworkVariable<NetworkObject> weapon = new(
-		null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server); 
+		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
     public override void OnNetworkSpawn()
     {
 		// sets onvaluechanged methods to network variables
-        if (!IsOwner) return;
-        health.OnValueChanged += OnHealthChanged;
-		weapon.OnValueChanged += OnWeaponChanged;
+		Debug.Log("spawn");
+		gun.SetActive(false);
+
+		if (!IsOwner) { 
+			canvas.SetActive(false);
+		}
+		else
+		{
+			health.OnValueChanged += OnHealthChanged;
+			canvas.SetActive(true);
+		}
     }
 
 	private void OnHealthChanged(float oldValue, float newValue)
@@ -30,12 +37,6 @@ public class Player : NetworkBehaviour
 		if (IsOwner)
 			healthText.text = newValue.ToString("0");
 	}
-	private void OnWeaponChanged(NetworkObject oldValue, NetworkObject newValue)
-	{
-		if (IsOwner)
-			weapon.Value = newValue;
-	}
-
 	[ServerRpc]
 	public void TakeDamageServerRpc(float damage)
 	{
@@ -51,17 +52,20 @@ public class Player : NetworkBehaviour
 	[ServerRpc]
 	public void GiveWeaponServerRpc(NetworkObjectReference weaponRef)
 	{
-		if (weaponRef.TryGet(out NetworkObject weaponObj))
-		{
-			weapon = weaponObj.GetComponent<Weapon>();
-			// Optionally parent weapon to player, etc.
-		}
+		gameObject.SetActive(true);
+	}
+
+	public void GiveWeapon()
+	{
+		if (!IsOwner) return;
+
+		Debug.Log("what");
+		gun.SetActive(true);
 	}
 
 	[ServerRpc]
 	public void RemoveWeaponServerRpc()
 	{
-		weapon.Value = default;
 	}
 
 	public void Update()
@@ -72,7 +76,6 @@ public class Player : NetworkBehaviour
         {
 			Debug.Log("shoot");
 			
-			weapon.Shoot(transform, transform.forward + cam.transform.forward);
         }
     }
 }

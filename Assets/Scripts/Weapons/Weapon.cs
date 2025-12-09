@@ -72,7 +72,7 @@ class Projectile : NetworkBehaviour
                     Destroy(gameObject);
                 } else if (LayerMask.Equals(hit.gameObject.layer, groundMask))
                 {
-                    Destroy(gameObject);
+                    GetComponent<NetworkObject>().Despawn();
                 }
             }
         }

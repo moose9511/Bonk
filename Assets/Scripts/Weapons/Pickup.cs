@@ -15,14 +15,14 @@ public class Pickup : NetworkBehaviour
         foreach (Collider col in colliders)
         {
             Player player = col.GetComponent<Player>();
-            if (player != null && player.IsOwner)
+            if (player != null)
             {
                 // spawns weapon
 				NetworkObject spawnedWeapon = Instantiate(contents, player.transform);
                 spawnedWeapon.Spawn();
 
                 // gives player the weapon
-				player.GiveWeaponServerRpc(spawnedWeapon);
+                player.GiveWeapon();
 
                 // destroys pickup
                 spawnedWeapon.Despawn();
