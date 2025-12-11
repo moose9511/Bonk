@@ -19,6 +19,7 @@ public class Projectile : NetworkBehaviour
     {
         this.weapon = weapon;
         this.direction = direction;
+        networkObject = GetComponent<NetworkObject>();
 
         if (weapon == null)
         {

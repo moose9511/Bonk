@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 8784490989235529392}
   - component: {fileID: 881548253102133184}
   - component: {fileID: 3595175496296595251}
-  m_Layer: 0
+  - component: {fileID: 1359269566509387397}
+  m_Layer: 11
   m_Name: Pickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,7 +150,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  weapon: {fileID: 5058054660678220987, guid: ec7f14ec9e083c04fb7d2dfa006a30f4, type: 3}
+  weapon: {fileID: 0}
 --- !u!114 &3595175496296595251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,3 +197,16 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &1359269566509387397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8393425164714305327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b1dbbab1e302d543907779b6fb52f55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponData: {fileID: 11400000, guid: 38b5adcbd2f901e47b4652c59db41781, type: 2}

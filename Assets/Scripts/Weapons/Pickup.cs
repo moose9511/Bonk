@@ -4,43 +4,25 @@ using Unity.VisualScripting;
 
 public class Pickup : NetworkBehaviour
 {
-    public GameObject weapon;
-
-    private Weapon weaponScript;
+    public WeaponPickup weapon;
 
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        weaponScript = GetComponent<Weapon>();
+
+        weapon = GetComponent<WeaponPickup>();
 
         if(weapon == null)
         {
             gameObject.GetComponent<NetworkObject>().Despawn();
             Debug.Log("despawn");
+            return;
         }
-
-        weaponScript.GetComponent<NetworkObject>().Spawn();
-        weaponScript.OnNetworkSpawn();
-
     }
-    // Update is called once per frame
-    void FixedUpdate()
+
+    [ServerRpc]
+    public void DieServerRpc()
     {
-        if (!IsServer) return;
-
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 1f);
-
-        foreach (Collider col in colliders)
-        {
-            Player player = col.GetComponent<Player>();
-            if (player == null) continue;
-
-            Instantiate(weapon);
-
-            // gives player the weapon
-            player.GiveWeapon(weapon);
-
-            gameObject.GetComponent<NetworkObject>().Despawn();
-        }
-    }
+		gameObject.GetComponent<NetworkObject>().Despawn();
+	}
 }

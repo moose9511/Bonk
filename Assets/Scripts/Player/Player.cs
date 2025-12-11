@@ -1,6 +1,7 @@
 using TMPro;
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player : NetworkBehaviour
 {
@@ -11,13 +12,15 @@ public class Player : NetworkBehaviour
 
     [SerializeField] private GameObject cam;
 
+	[SerializeField] private LayerMask pickupMask;
+
 	public static int groundLayer;
 
 	// health
     private NetworkVariable<float> health = new(
 		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
-	private Weapon weapon;
+	[SerializeField] private Weapon weapon;
 
     public override void OnNetworkSpawn()
     {
@@ -43,7 +46,6 @@ public class Player : NetworkBehaviour
 	public void TakeDamageServerRpc(float damage)
 	{
 		health.Value = Mathf.Max(0, health.Value - damage);
-		Debug.Log("take damage");
 	}
 
 	[ServerRpc]
@@ -52,30 +54,44 @@ public class Player : NetworkBehaviour
 		health.Value = Mathf.Min(100f, health.Value + heal);
 	}
 
-	[ServerRpc]
-	public void GiveWeaponServerRpc()
-	{
-		
-	}
-
-	public void GiveWeapon(GameObject weapon)
-	{
-		this.weapon = weapon.GetComponent<Weapon>();
-    }
-
-	[ServerRpc]
-	public void RemoveWeaponServerRpc()
-	{
-	}
-
 	public void Update()
     {
-		if(!IsOwner) return;	
+		if(!IsOwner) return;
+
+		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), 1f, pickupMask);
+		foreach (Collider coll in pickups)
+		{
+			Pickup pickup = coll.gameObject.GetComponent<Pickup>();
+
+			WeaponPickup weaponPickup = coll.gameObject.GetComponent<WeaponPickup>();
+			if (weaponPickup != null)
+			{
+				weapon = weaponPickup.WeaponData;
+			}
+
+			pickup.DieServerRpc();
+		}
 
 		if (weapon != null && Input.GetMouseButtonDown(0))
         {
-			weapon.ShootServerRpc();
-        }
+			// gets facing direction
+			Vector3 shootDirection = cam.transform.forward;
+
+			// spawns projectile in front of player
+			GameObject obj = Instantiate(weapon.projPrefab, transform.position + shootDirection * 2f, Quaternion.identity);
+			obj.GetComponent<NetworkObject>().Spawn();
+
+			// initializes it's projectile script
+			var proj = obj.GetComponent<Projectile>();
+			proj.Init(weapon, shootDirection);
+		}
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere(transform.position + new Vector3(0, .5f, 0), .75f);
+		Gizmos.DrawWireSphere(transform.position - new Vector3(0, .5f, 0), .75f);
     }
 }
 

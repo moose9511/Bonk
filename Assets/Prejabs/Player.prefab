@@ -352,7 +352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 1
+  NetworkTransformExpanded: 0
   AutoOwnerAuthorityTickOffset: 1
   PositionInterpolationType: 0
   RotationInterpolationType: 0
@@ -432,7 +432,9 @@ MonoBehaviour:
   canvas: {fileID: 470547865990248447}
   healthText: {fileID: 6576592602056439830}
   cam: {fileID: 570294274306881343}
-  gun: {fileID: 0}
+  pickupMask:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!136 &3266946542563700516
 CapsuleCollider:
   m_ObjectHideFlags: 0
