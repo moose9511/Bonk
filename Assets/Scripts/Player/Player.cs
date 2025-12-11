@@ -10,17 +10,19 @@ public class Player : NetworkBehaviour
 	[SerializeField] private TextMeshProUGUI healthText;
 
     [SerializeField] private GameObject cam;
-	[SerializeField] private GameObject gun;
+
+	public static int groundLayer;
 
 	// health
     private NetworkVariable<float> health = new(
 		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
+	private Weapon weapon;
+
     public override void OnNetworkSpawn()
     {
-		// sets onvaluechanged methods to network variables
-		Debug.Log("spawn");
-		gun.SetActive(false);
+
+        groundLayer = LayerMask.NameToLayer("Ground");
 
 		if (!IsOwner) { 
 			canvas.SetActive(false);
@@ -50,18 +52,15 @@ public class Player : NetworkBehaviour
 	}
 
 	[ServerRpc]
-	public void GiveWeaponServerRpc(NetworkObjectReference weaponRef)
+	public void GiveWeaponServerRpc()
 	{
-		gameObject.SetActive(true);
+		
 	}
 
-	public void GiveWeapon()
+	public void GiveWeapon(GameObject weapon)
 	{
-		if (!IsOwner) return;
-
-		Debug.Log("what");
-		gun.SetActive(true);
-	}
+		this.weapon = weapon.GetComponent<Weapon>();
+    }
 
 	[ServerRpc]
 	public void RemoveWeaponServerRpc()
@@ -72,10 +71,10 @@ public class Player : NetworkBehaviour
     {
 		if(!IsOwner) return;	
 
-		if (Input.GetMouseButtonDown(0))
+		if (weapon != null && Input.GetMouseButtonDown(0))
         {
 			Debug.Log("shoot");
-			
+			weapon.Shoot(transform, cam.transform.forward);
         }
     }
 }

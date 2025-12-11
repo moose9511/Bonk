@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6509628872114535883}
-  - component: {fileID: 4332158246229534926}
+  - component: {fileID: -8577639410281627480}
   - component: {fileID: -5487164205086974247}
   m_Layer: 0
   m_Name: Weapon
@@ -33,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4332158246229534926
+--- !u!114 &-8577639410281627480
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1621116577
+  GlobalObjectIdHash: 483130120
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -71,12 +71,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  weaponMesh: {fileID: 0}
-  projPrefab: {fileID: 6782282220976112871, guid: aa4f125a4f8cf574baeed3fc442cc01d, type: 3}
+  weaponMesh: {fileID: -2432090755550338912, guid: 9f128ea891731634298e67a18fdac132, type: 3}
+  projPrefab: {fileID: 2409600643230246329, guid: aa4f125a4f8cf574baeed3fc442cc01d, type: 3}
   damage: 1
   strength: 1
   range: 1
-  speed: 1
+  speed: 10
   fireRate: 1
-  lifeTime: 10
-  radius: 1
+  lifeTime: 100
+  radius: 0.5

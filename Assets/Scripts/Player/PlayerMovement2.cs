@@ -149,18 +149,21 @@ public class PlayerMovement2 : NetworkBehaviour
 
         if (angle >= 90f)
         {
-            Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
-            extraForce = slopeDirection;
+            //Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
+            //extraForce = slopeDirection;
             isGrounded = true;
 
-            //if(vInput != 0 || hInput != 0 || horForce != Vector3.zero)
-            //{
-            //    Vector3 dir = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
-            //    extraForce = dir;   
-            //} else
-            //{
-            //    extraForce = Vector3.zero;
-            //}
+            if (vInput != 0 || hInput != 0 || horForce != Vector3.zero)
+            {
+                Vector3 dir = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * 
+                    (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
+
+                extraForce = dir;
+            }
+            else
+            {
+                extraForce = Vector3.zero;
+            }
         } else if (angle < 90f && angle > 40f)
         {
             Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);

@@ -1,10 +1,27 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.VisualScripting;
 
 public class Pickup : NetworkBehaviour
 {
-    public NetworkObject contents;
+    public GameObject weapon;
 
+    private Weapon weaponScript;
+
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        weaponScript = GetComponent<Weapon>();
+
+        if(weapon == null)
+        {
+            gameObject.GetComponent<NetworkObject>().Despawn();
+            Debug.Log("despawn");
+        }
+            
+
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -15,24 +32,12 @@ public class Pickup : NetworkBehaviour
         foreach (Collider col in colliders)
         {
             Player player = col.GetComponent<Player>();
-            if (player != null)
-            {
-                // spawns weapon
-				NetworkObject spawnedWeapon = Instantiate(contents, player.transform);
-                spawnedWeapon.Spawn();
+            if (player == null) continue;
 
-                // gives player the weapon
-                player.GiveWeapon();
+            // gives player the weapon
+            player.GiveWeapon(weapon);
 
-                // destroys pickup
-                spawnedWeapon.Despawn();
-                gameObject.GetComponent<NetworkObject>().Despawn();
-            }
+            gameObject.GetComponent<NetworkObject>().Despawn();
         }
-    }
-
-    public void AddWeapon(NetworkObject weapon)
-    {
-        contents = weapon;
     }
 }

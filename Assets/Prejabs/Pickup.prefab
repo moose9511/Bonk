@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  contents: {fileID: 4332158246229534926, guid: ec7f14ec9e083c04fb7d2dfa006a30f4, type: 3}
+  weapon: {fileID: 5058054660678220987, guid: ec7f14ec9e083c04fb7d2dfa006a30f4, type: 3}
 --- !u!114 &3595175496296595251
 MonoBehaviour:
   m_ObjectHideFlags: 0

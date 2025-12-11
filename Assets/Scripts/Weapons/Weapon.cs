@@ -18,13 +18,12 @@ public class Weapon : NetworkBehaviour
 
     public void Shoot(Transform shootPoint, Vector3 direction)
     {
-        GameObject obj = Instantiate(projPrefab, shootPoint.position + direction, Quaternion.identity);
+        GameObject obj = Instantiate(projPrefab, shootPoint.position + direction * 2f, Quaternion.identity);
         obj.AddComponent<Projectile>();
 
         if(obj == null)
-        {
             return;
-        }
+
         obj.GetComponent<Projectile>().Init(this, direction);
     }
 
@@ -37,21 +36,26 @@ class Projectile : NetworkBehaviour
     private Weapon weapon;
     private Vector3 direction;
     private LayerMask groundMask;
+    private NetworkObject networkObject;
     private IEnumerator die()
     {
         yield return new WaitForSeconds(weapon.lifeTime);
         Destroy(gameObject);
     }
+
     public void Init(Weapon weapon, Vector3 direction)
     {
         this.weapon = weapon;
         this.direction = direction;
         groundMask = LayerMask.GetMask("Ground");
 
+        networkObject = GetComponent<NetworkObject>();
+        networkObject.Spawn();
+        
         if(weapon == null)
         {
             Debug.Log("weapon is null");
-            Destroy(gameObject);
+            networkObject.Despawn();
         }
 
         StartCoroutine(die());
@@ -62,19 +66,23 @@ class Projectile : NetworkBehaviour
         colliders = Physics.OverlapSphere(transform.position, weapon.radius);
         foreach (Collider hit in colliders)
         {
-            if (hit != null)
+            if (hit == null) continue;
+
+            if (hit.gameObject.CompareTag("Player"))
             {
-                Debug.Log(LayerMask.Equals(hit.gameObject.layer, groundMask) + " | " + hit.gameObject.layer + " | " + groundMask );
-                if (hit.gameObject.CompareTag("Player"))
-                {
-                    hit.gameObject.GetComponent<PlayerMovement2>()?.AddForce(direction * weapon.strength);
-                    hit.gameObject.GetComponent<Player>()? .TakeDamageServerRpc(weapon.damage);
-                    Destroy(gameObject);
-                } else if (LayerMask.Equals(hit.gameObject.layer, groundMask))
-                {
-                    GetComponent<NetworkObject>().Despawn();
-                }
+                hit.gameObject.GetComponent<PlayerMovement2>()?.AddForce(direction * weapon.strength);
+                hit.gameObject.GetComponent<Player>()? .TakeDamageServerRpc(weapon.damage);
+                networkObject.Despawn();
+            } else if (hit.gameObject.layer == Player.groundLayer)
+            {
+                GetComponent<NetworkObject>().Despawn();
             }
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, weapon.radius);  
     }
 }
