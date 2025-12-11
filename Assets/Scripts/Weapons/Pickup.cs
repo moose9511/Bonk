@@ -8,7 +8,6 @@ public class Pickup : NetworkBehaviour
 
     private Weapon weaponScript;
 
-
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -19,7 +18,9 @@ public class Pickup : NetworkBehaviour
             gameObject.GetComponent<NetworkObject>().Despawn();
             Debug.Log("despawn");
         }
-            
+
+        weaponScript.GetComponent<NetworkObject>().Spawn();
+        weaponScript.OnNetworkSpawn();
 
     }
     // Update is called once per frame
@@ -33,6 +34,8 @@ public class Pickup : NetworkBehaviour
         {
             Player player = col.GetComponent<Player>();
             if (player == null) continue;
+
+            Instantiate(weapon);
 
             // gives player the weapon
             player.GiveWeapon(weapon);

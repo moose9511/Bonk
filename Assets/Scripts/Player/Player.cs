@@ -43,6 +43,7 @@ public class Player : NetworkBehaviour
 	public void TakeDamageServerRpc(float damage)
 	{
 		health.Value = Mathf.Max(0, health.Value - damage);
+		Debug.Log("take damage");
 	}
 
 	[ServerRpc]
@@ -73,8 +74,7 @@ public class Player : NetworkBehaviour
 
 		if (weapon != null && Input.GetMouseButtonDown(0))
         {
-			Debug.Log("shoot");
-			weapon.Shoot(transform, cam.transform.forward);
+			weapon.ShootServerRpc();
         }
     }
 }
