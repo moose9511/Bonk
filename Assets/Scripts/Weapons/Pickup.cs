@@ -20,7 +20,7 @@ public class Pickup : NetworkBehaviour
         }
     }
 
-    [ServerRpc]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void DieServerRpc()
     {
 		gameObject.GetComponent<NetworkObject>().Despawn();

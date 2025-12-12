@@ -6,39 +6,49 @@ public class Projectile : NetworkBehaviour
 {
     private Collider[] colliders;
 
-    private Weapon weapon;
+    /* list of values goes like this:
+     * 0: damage
+     * 1: strength
+     * 2: speed
+     * 3: lifetime
+     * 4: radius
+     * 5: x
+     * 6: y
+     * 7: z
+     * */
+    private float[] values;
+
     private Vector3 direction;
     private NetworkObject networkObject;
     private IEnumerator die()
     {
-        yield return new WaitForSeconds(weapon.lifeTime);
+        yield return new WaitForSeconds(values[3]);
         Destroy(gameObject);
     }
 
-    public void Init(Weapon weapon, Vector3 direction)
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void InitServerRpc(float[] values)
     {
-        this.weapon = weapon;
-        this.direction = direction;
-        networkObject = GetComponent<NetworkObject>();
+		this.values = values;
+        direction = new Vector3(values[5], values[6], values[7]);
 
-        if (weapon == null)
-        {
-            Debug.Log("weapon is null");
-            GetComponent<NetworkObject>().Despawn();
-        }
+		networkObject = GetComponent<NetworkObject>();
 
-        StartCoroutine(die());
+		StartCoroutine(die());
     }
+
     void Update()
     {
-        transform.Translate(weapon.speed * Time.deltaTime * direction);
-        colliders = Physics.OverlapSphere(transform.position, weapon.radius);
+        if(values == null || values.Length == 0) return;
+
+        transform.Translate(values[2] * Time.deltaTime * direction);
+        colliders = Physics.OverlapSphere(transform.position, values[4]);
         foreach (Collider hit in colliders)
         {
             if (hit.gameObject.CompareTag("Player"))
             {
-                hit.GetComponent<PlayerMovement2>()?.AddForce(direction * weapon.strength);
-                hit.GetComponent<Player>()?.TakeDamageServerRpc(weapon.damage);
+                hit.GetComponent<PlayerMovement2>()?.AddForce(direction * values[1]);
+                hit.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
                 networkObject.Despawn();
             }
             else if (hit.gameObject.layer == Player.groundLayer)
@@ -48,9 +58,4 @@ public class Projectile : NetworkBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, weapon.radius);
-    }
 }

@@ -21,6 +21,7 @@ public class Player : NetworkBehaviour
 		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
 	[SerializeField] private Weapon weapon;
+	private GameObject lastProjectile;
 
     public override void OnNetworkSpawn()
     {
@@ -44,7 +45,7 @@ public class Player : NetworkBehaviour
 		if (IsOwner)
 			healthText.text = newValue.ToString("0");
 	}
-	[ServerRpc]
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void TakeDamageServerRpc(float damage)
 	{
 		health.Value = Mathf.Max(0, health.Value - damage);
@@ -77,18 +78,21 @@ public class Player : NetworkBehaviour
 
 		if (weapon != null && Input.GetMouseButtonDown(0))
         {
-			// gets facing direction
-			Vector3 shootDirection = cam.transform.forward;
-
-			// spawns projectile in front of player
-			Debug.Log((weapon.projPrefab == null) + "------------------------------------------------------");
-			GameObject obj = Instantiate(weapon.projPrefab, transform.position + shootDirection * 2f, Quaternion.identity);
-			obj.GetComponent<NetworkObject>().Spawn();
-
-			// initializes it's projectile script
-			var proj = obj.GetComponent<Projectile>();
-			proj.Init(weapon, shootDirection);
+			SpawnProjServerRpc();
 		}
     }
+
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+	public void SpawnProjServerRpc()
+	{
+		lastProjectile = Instantiate(weapon.projPrefab, 
+			cam.transform.position + cam.transform.forward * weapon.distanceToShooter, Quaternion.identity);
+
+		lastProjectile.GetComponent<NetworkObject>().Spawn();
+
+		var proj = lastProjectile.GetComponent<Projectile>();
+		float[] values = weapon.SerializeData(cam.transform.forward);
+		proj.InitServerRpc(values);
+	}
 }
 
