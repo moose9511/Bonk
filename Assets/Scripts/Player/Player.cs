@@ -25,8 +25,10 @@ public class Player : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
 
+		// sets ground layer
         groundLayer = LayerMask.NameToLayer("Ground");
 
+		// sets correct canvas for each player
 		if (!IsOwner) { 
 			canvas.SetActive(false);
 		}
@@ -58,7 +60,8 @@ public class Player : NetworkBehaviour
     {
 		if(!IsOwner) return;
 
-		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), 1f, pickupMask);
+		// checks to see if player has collided with a pickup
+		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, pickupMask);
 		foreach (Collider coll in pickups)
 		{
 			Pickup pickup = coll.gameObject.GetComponent<Pickup>();
@@ -78,6 +81,7 @@ public class Player : NetworkBehaviour
 			Vector3 shootDirection = cam.transform.forward;
 
 			// spawns projectile in front of player
+			Debug.Log((weapon.projPrefab == null) + "------------------------------------------------------");
 			GameObject obj = Instantiate(weapon.projPrefab, transform.position + shootDirection * 2f, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().Spawn();
 
@@ -85,13 +89,6 @@ public class Player : NetworkBehaviour
 			var proj = obj.GetComponent<Projectile>();
 			proj.Init(weapon, shootDirection);
 		}
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position + new Vector3(0, .5f, 0), .75f);
-		Gizmos.DrawWireSphere(transform.position - new Vector3(0, .5f, 0), .75f);
     }
 }
 

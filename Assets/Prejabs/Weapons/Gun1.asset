@@ -17,7 +17,7 @@ MonoBehaviour:
   damage: 1
   strength: 1
   range: 1
-  speed: 11
+  speed: 9
   fireRate: 1
   lifeTime: 10
   radius: 0.5

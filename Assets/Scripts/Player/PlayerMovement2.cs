@@ -105,11 +105,14 @@ public class PlayerMovement2 : NetworkBehaviour
             player.TakeDamageServerRpc(stoppingForce.magnitude);
         }
 
+        // gets any overlap in colliders and corrects it
         ColliderExtensions.GetPenetrationInLayer(col, LayerMask.GetMask("Ground"), out correction);
         transform.position += correction;
 
+        // applies movement
         transform.position += ((movement * moveSpeed + extraForce) * Time.deltaTime);
 
+        // when on ground, dampen extraforce more
         if (isGrounded)
             forceDampen = .7f;
         else
