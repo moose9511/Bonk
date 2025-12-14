@@ -15,7 +15,6 @@ public class Pickup : NetworkBehaviour
         if(weapon == null)
         {
             gameObject.GetComponent<NetworkObject>().Despawn();
-            Debug.Log("despawn");
             return;
         }
     }
@@ -23,6 +22,6 @@ public class Pickup : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void DieServerRpc()
     {
-		gameObject.GetComponent<NetworkObject>().Despawn();
+		gameObject.GetComponent<NetworkObject>().Despawn(true);
 	}
 }

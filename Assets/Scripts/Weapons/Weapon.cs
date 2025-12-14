@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[System.Serializable]
 [CreateAssetMenu(fileName = "Weapon", menuName = "Scriptable Objects/Weapon")]
 public class Weapon : ScriptableObject
 {
@@ -12,6 +13,8 @@ public class Weapon : ScriptableObject
 	[SerializeField] public float fireRate = 1f;
 	[SerializeField] public float lifeTime = 10f;
 	[SerializeField] public float radius = 1f;
+
+	public int weaponId;
 	public float distanceToShooter = 1.1f;
 
 	public float[] SerializeData(Vector3 direction)

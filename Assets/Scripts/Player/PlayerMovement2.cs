@@ -43,10 +43,6 @@ public class PlayerMovement2 : NetworkBehaviour
         vInput = Input.GetAxisRaw("Vertical");
         hInput = Input.GetAxisRaw("Horizontal");
 
-        if(Input.GetKeyDown(KeyCode.F))
-        {
-            transform.Rotate(transform.right, 90f);
-		}
 		// prevents faster diagonal movement
 		if (Mathf.Abs(hInput) == 1 && Mathf.Abs(vInput) == 1)
         {
@@ -137,7 +133,7 @@ public class PlayerMovement2 : NetworkBehaviour
     // handles movement based on the angle of the ground
     private void ApplyGroundMotion()
     {
-        Physics.SphereCast(transform.position, .3f, -transform.up, out groundHit, hitboxOffset);
+        Physics.Raycast(transform.position, -transform.up, out groundHit, 1.1f);
 
         if (groundHit.collider == null)
         {
@@ -149,11 +145,10 @@ public class PlayerMovement2 : NetworkBehaviour
         Vector3 groundNormal = groundHit.normal;
 
         float angle = Vector3.Angle(Vector3.Normalize(horForce + lastMove), groundNormal);
+        
 
         if (angle >= 90f)
         {
-            //Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
-            //extraForce = slopeDirection;
             isGrounded = true;
 
             if (vInput != 0 || hInput != 0 || horForce != Vector3.zero)
@@ -181,7 +176,7 @@ public class PlayerMovement2 : NetworkBehaviour
         }
         else
             isGrounded = false;
-
+        Debug.Log(isGrounded);
     }
 
     // handles jump and gravity application
@@ -231,11 +226,13 @@ public class PlayerMovement2 : NetworkBehaviour
     {
         //Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
         Gizmos.DrawRay(transform.position, lastMove);
+        
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position - transform.up * hitboxOffset, .3f);
         Gizmos.DrawWireSphere(transform.position, .6f);
         Gizmos.color = Color.blue;
         if(extraForce.magnitude > 0)
             Gizmos.DrawWireSphere(transform.position + extraForce.normalized * .1f, .5f);
+        Gizmos.DrawRay(transform.position, -transform.up * 1.1f);
     }
 }

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -19,13 +20,13 @@ public class Player : NetworkBehaviour
 	// health
     private NetworkVariable<float> health = new(
 		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
+	private NetworkVariable<int> weaponId = new(
+		-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-	[SerializeField] private Weapon weapon;
-	private GameObject lastProjectile;
+	private Weapon currentWeapon = null;
 
     public override void OnNetworkSpawn()
     {
-
 		// sets ground layer
         groundLayer = LayerMask.NameToLayer("Ground");
 
@@ -45,13 +46,14 @@ public class Player : NetworkBehaviour
 		if (IsOwner)
 			healthText.text = newValue.ToString("0");
 	}
+
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void TakeDamageServerRpc(float damage)
 	{
 		health.Value = Mathf.Max(0, health.Value - damage);
 	}
 
-	[ServerRpc]
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void GainHealthServerRpc(float heal)
 	{
 		health.Value = Mathf.Min(100f, health.Value + heal);
@@ -70,29 +72,38 @@ public class Player : NetworkBehaviour
 			WeaponPickup weaponPickup = coll.gameObject.GetComponent<WeaponPickup>();
 			if (weaponPickup != null)
 			{
-				weapon = weaponPickup.WeaponData;
+				currentWeapon = weaponPickup.WeaponData;
+				SetWeaponServerRpc(currentWeapon.weaponId);
 			}
 
-			pickup.DieServerRpc();
+            pickup.DieServerRpc();
 		}
 
-		if (weapon != null && Input.GetMouseButtonDown(0))
+		
+		if (currentWeapon != null && Input.GetMouseButtonDown(0))
         {
-			SpawnProjServerRpc();
-		}
+			float[] values = currentWeapon.SerializeData(cam.transform.forward);
+            SpawnProjServerRpc(values);
+        }
     }
-
+	
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-	public void SpawnProjServerRpc()
+	public void SpawnProjServerRpc(float[] values)
 	{
-		lastProjectile = Instantiate(weapon.projPrefab, 
-			cam.transform.position + cam.transform.forward * weapon.distanceToShooter, Quaternion.identity);
+        var projObj = Instantiate(currentWeapon.projPrefab,
+        cam.transform.position + cam.transform.forward * currentWeapon.distanceToShooter,
+        Quaternion.identity);
 
-		lastProjectile.GetComponent<NetworkObject>().Spawn();
+        var proj = projObj.GetComponent<Projectile>();
+        proj.GetComponent<NetworkObject>().Spawn(true);
+		
+		proj.Init(values);
+	}
 
-		var proj = lastProjectile.GetComponent<Projectile>();
-		float[] values = weapon.SerializeData(cam.transform.forward);
-		proj.InitServerRpc(values);
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+	public void SetWeaponServerRpc(int weaponId)
+	{
+		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
 }
 

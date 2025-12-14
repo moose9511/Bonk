@@ -26,8 +26,8 @@ public class Projectile : NetworkBehaviour
         Destroy(gameObject);
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    public void InitServerRpc(float[] values)
+    //[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void Init(float[] values)
     {
 		this.values = values;
         direction = new Vector3(values[5], values[6], values[7]);
@@ -39,7 +39,8 @@ public class Projectile : NetworkBehaviour
 
     void Update()
     {
-        if(values == null || values.Length == 0) return;
+        if (values == null || values.Length == 0)
+            return;
 
         transform.Translate(values[2] * Time.deltaTime * direction);
         colliders = Physics.OverlapSphere(transform.position, values[4]);
