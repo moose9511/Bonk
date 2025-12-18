@@ -105,14 +105,13 @@
       }
     },
     "com.unity.multiplayer.samples.coop": {
-      "version": "https://github.com/Unity-Technologies/com.unity.multiplayer.samples.coop.git?path=/Packages/com.unity.multiplayer.samples.coop",
+      "version": "file:C:/Users/kalen/Downloads/com.unity.multiplayer.samples.coop-main/com.unity.multiplayer.samples.coop-main/Packages/com.unity.multiplayer.samples.coop",
       "depth": 0,
-      "source": "git",
+      "source": "local",
       "dependencies": {
         "com.unity.multiplayer.tools": "2.2.3",
         "com.unity.netcode.gameobjects": "2.2.0"
-      },
-      "hash": "1299ba4fc97d83b634e7d32a86c438ba668d7f9c"
+      }
     },
     "com.unity.multiplayer.tools": {
       "version": "2.2.6",
