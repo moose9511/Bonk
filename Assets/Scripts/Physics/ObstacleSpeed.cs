@@ -36,8 +36,15 @@ public class ObstacleSpeed : NetworkBehaviour
         }
         velocity = smoothedVelocity / velocityHistory.Count;
         lastPos = transform.position;
+
     }
 
     public Vector3 getHitPower() { return velocity * power; }
     public Vector3 getVelocity() { return velocity; }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(transform.position, transform.position + velocity / 5);
+    }
 }
+

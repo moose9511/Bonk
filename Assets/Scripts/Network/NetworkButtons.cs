@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class NetworkButtons : MonoBehaviour
 {
     [SerializeField] private Button hostBtn;
-    [SerializeField] private Button serverBtn;
     [SerializeField] private Button clientBtn;
 
     private void Awake()
@@ -23,9 +22,6 @@ public class NetworkButtons : MonoBehaviour
             NetworkManager.Singleton.StartClient();
         });
 
-        NetworkManager.Singleton.OnClientConnectedCallback += (id) => {
-            Debug.Log($"Client {id} connected");
-        };
     }
 
 }

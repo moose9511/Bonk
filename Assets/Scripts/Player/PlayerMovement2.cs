@@ -58,7 +58,7 @@ public class PlayerMovement2 : NetworkBehaviour
             lastMove = movement;
 
         ApplyGroundMotion();
-        bodyColliders = Physics.OverlapSphere(transform.position, .6f, LayerMask.GetMask("Ground"));
+        bodyColliders = Physics.OverlapSphere(transform.position, .6f, LayerMask.GetMask("Ground")); 
 
         // if player is touching ground reset fall speed and allow jump
         ObstacleSpeed groundSpeed = GroundedEvent();
@@ -68,6 +68,7 @@ public class PlayerMovement2 : NetworkBehaviour
 		if (bodyColliders.Length > 0)
             FindWallCollider(bodyColliders, out obstacleHit);
 
+
         ObstacleSpeed bodySpeed = null;
         if (obstacleHit.collider != null)
             bodySpeed = obstacleHit.collider.GetComponent<ObstacleSpeed>();
@@ -76,17 +77,20 @@ public class PlayerMovement2 : NetworkBehaviour
         // prioritizes body collisions over ground collisions
         if (bodySpeed != null)
         {
-			Vector3 normalDiff = bodySpeed.getVelocity().normalized - transform.position.normalized;
+            // adds extra force based on the difference in direction between player and obstacle
+            Vector3 normalDiff = bodySpeed.getVelocity().normalized - transform.position.normalized;
             Vector3 speed = bodySpeed.getVelocity();
             Vector3 scaled = Vector3.Scale(normalDiff, speed);
 
-            if(scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
+            // only adds force if it will increase the player's current extraforce
+            if (scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
 				extraForce += speed - scaled;
 
 		}
         else if (groundSpeed != null && extraForce.magnitude < groundSpeed.getVelocity().magnitude)
         {
-            if(extraForce.magnitude < groundSpeed.getVelocity().magnitude)
+            // adds ground movement to extraforce
+            if (extraForce.magnitude < groundSpeed.getVelocity().magnitude)
                 extraForce += groundSpeed.getVelocity();
         }
             
@@ -133,7 +137,7 @@ public class PlayerMovement2 : NetworkBehaviour
     // handles movement based on the angle of the ground
     private void ApplyGroundMotion()
     {
-        Physics.Raycast(transform.position, -transform.up, out groundHit, 1.1f);
+        Physics.Raycast(transform.position, -transform.up, out groundHit, 1.1f, LayerMask.GetMask("Ground"));
 
         if (groundHit.collider == null)
         {
@@ -176,7 +180,6 @@ public class PlayerMovement2 : NetworkBehaviour
         }
         else
             isGrounded = false;
-        Debug.Log(isGrounded);
     }
 
     // handles jump and gravity application
