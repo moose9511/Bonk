@@ -417,6 +417,7 @@ MonoBehaviour:
   hitboxOffset: 0.8
   forceDampen: 0.5
   gravity: -14.81
+  mapPos: {x: 185.9636, y: 9.257732, z: 150.49161}
 --- !u!114 &3716029460672619465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,7 +437,6 @@ MonoBehaviour:
   pickupMask:
     serializedVersion: 2
     m_Bits: 2048
-  weapon: {fileID: 0}
 --- !u!136 &3266946542563700516
 CapsuleCollider:
   m_ObjectHideFlags: 0

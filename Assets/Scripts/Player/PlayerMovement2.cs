@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using System.Net;
 using System.Collections;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.CompilerServices;
 
 public class PlayerMovement2 : NetworkBehaviour
 {
@@ -26,14 +27,14 @@ public class PlayerMovement2 : NetworkBehaviour
     private Vector3 movement;
     private Collider col;
     private Player player;
-    private CameraMovement cameraMovement;
 
+    [SerializeField] private Vector3 mapPos;
     public override void OnNetworkSpawn()
     {
         col = GetComponent<Collider>();
         player = GetComponent<Player>();
-        cameraMovement = GetComponentInChildren<CameraMovement>();
 
+        GoTo(new Vector3(mapPos.x, mapPos.y + 20, mapPos.z));
     }
 
     void Update()
@@ -73,7 +74,6 @@ public class PlayerMovement2 : NetworkBehaviour
         if (obstacleHit.collider != null)
             bodySpeed = obstacleHit.collider.GetComponent<ObstacleSpeed>();
         
-
         // prioritizes body collisions over ground collisions
         if (bodySpeed != null)
         {
@@ -81,11 +81,11 @@ public class PlayerMovement2 : NetworkBehaviour
             Vector3 normalDiff = bodySpeed.getVelocity().normalized - transform.position.normalized;
             Vector3 speed = bodySpeed.getVelocity();
             Vector3 scaled = Vector3.Scale(normalDiff, speed);
-
+            
+            Debug.Log("speed: " + speed + " scale " + scaled + " diff " + normalDiff);
             // only adds force if it will increase the player's current extraforce
             if (scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
 				extraForce += speed - scaled;
-
 		}
         else if (groundSpeed != null && extraForce.magnitude < groundSpeed.getVelocity().magnitude)
         {
@@ -225,6 +225,11 @@ public class PlayerMovement2 : NetworkBehaviour
     {
         extraForce += force;
 	}
+
+    public void GoTo(Vector3 pos)
+    {
+        transform.position = pos;
+    }
 	private void OnDrawGizmos()
     {
         //Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
