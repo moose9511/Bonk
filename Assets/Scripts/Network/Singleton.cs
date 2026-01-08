@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
+
+public class Singleton<T> : MonoBehaviour where T : Component
 {
 	private static T _instance;
 
@@ -11,30 +12,25 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 			if (_instance == null)
 			{
 				// Find existing instance in the scene
-				_instance = FindFirstObjectByType<T>();
+				T[] objs = FindObjectsByType<T>(FindObjectsSortMode.None);
 
 				// If no instance exists, create a new one
-				if (_instance == null)
+				if (objs.Length > 0)
 				{
-					GameObject singletonObject = new GameObject(typeof(T).Name);
-					_instance = singletonObject.AddComponent<T>();
+					T instance = objs[0];
+					_instance = instance;
 				}
+				else
+				{
+					GameObject go = new GameObject();
+					go.name = typeof(T).Name;
+					_instance = go.AddComponent<T>();
+					DontDestroyOnLoad(go);
+				}
+
 			}
 			return _instance;
 		}
 	}
 
-	protected virtual void Awake()
-	{
-		// Ensure only one instance exists
-		if (_instance != null && _instance != this)
-		{
-			Destroy(gameObject);
-		}
-		else
-		{
-			_instance = this as T;
-			DontDestroyOnLoad(gameObject);
-		}
-	}
 }

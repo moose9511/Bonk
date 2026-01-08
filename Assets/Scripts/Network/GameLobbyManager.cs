@@ -1,10 +1,20 @@
+using System.Collections.Generic;
 using UnityEngine;
+using System.Threading.Tasks;
+using Unity.Services.Lobbies.Models;
 
 public class GameLobbyManager : Singleton<GameLobbyManager>
 {
 
-	public void CreateLobby(string lobbyName, int maxPlayers)
+	public async Task<bool> CreateLobby(string lobbyName, int maxPlayers)
 	{
-		LobbyManager.Instance.CreateLobby(lobbyName, maxPlayers, false, null);
+
+		Dictionary<string, string> playerData = new Dictionary<string, string>()
+		{
+			{ "GamerTag", "HostPlayer" }
+		};
+
+		bool success = await LobbyManager.Instance.CreateLobby(lobbyName, maxPlayers, false, playerData);
+		return success;
 	}
 }
