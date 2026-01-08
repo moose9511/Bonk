@@ -1,8 +1,7 @@
 # This .gitignore file should be placed at the root of your Unity project directory
 #
-# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
+# Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
-.utmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -10,14 +9,16 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
-*.log
+
+# output dir
+/Bin/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
 
-# Recordings can get excessive in size
-/[Rr]ecordings/
+# Asset meta data should only be ignored when the corresponding asset is also ignored
+!/[Aa]ssets/**/*.meta
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
@@ -48,6 +49,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+.vsconfig
 
 # Unity3D generated meta files
 *.pidb.meta
@@ -61,8 +63,6 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
-*.unitypackage.meta
-*.app
 
 # Crashlytics generated file
 crashlytics-build.properties
@@ -73,3 +73,16 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+.DS_Store
+
+.idea
+
+InitCodeMarker
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
