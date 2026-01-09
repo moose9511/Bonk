@@ -4,6 +4,7 @@ using Unity.Services.Lobbies;
 using System.Collections.Generic;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Core;
 
 public class LobbyManager : Singleton<LobbyManager>
 {
@@ -11,8 +12,18 @@ public class LobbyManager : Singleton<LobbyManager>
 
     public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
     {
+        if(UnityServices.State != ServicesInitializationState.Initialized)
+            await UnityServices.InitializeAsync();
+
+        if(!AuthenticationService.Instance.IsSignedIn)
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
         Dictionary<string, PlayerDataObject> playerData = SerializePlayerData(data);
-    	Unity.Services.Lobbies.Models.Player player = new Unity.Services.Lobbies.Models.Player(AuthenticationService.Instance.PlayerId, null, playerData);
+        var player = new Unity.Services.Lobbies.Models.Player(
+            AuthenticationService.Instance.PlayerId, 
+            null, 
+            playerData
+        );
 
         CreateLobbyOptions options = new CreateLobbyOptions
         {
