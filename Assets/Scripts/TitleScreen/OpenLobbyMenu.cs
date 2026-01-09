@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
@@ -41,7 +42,12 @@ public class OpenLobbyMenu : MonoBehaviour
 		if(j < 2 || j > 32)
 			j = 16;
 
-		await GameLobbyManager.Instance.CreateLobby(serverNameField.text, j);
+		bool success = await GameLobbyManager.Instance.CreateLobby(serverNameField.text, j);
+
+		if(success)
+		{
+			SceneManager.LoadScene("map1");
+		}
 	}
 
 
