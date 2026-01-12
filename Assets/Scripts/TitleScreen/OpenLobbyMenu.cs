@@ -13,29 +13,13 @@ public class OpenLobbyMenu : MonoBehaviour
 	[SerializeField] private TMP_InputField serverNameField;
 	[SerializeField] private TMP_InputField maxPlayerField;
 
-    [SerializeField] private UnityEngine.UI.Button openLobbyButton;
-	[SerializeField] private UnityEngine.UI.Button lobbyBackButton;
 	[SerializeField] private UnityEngine.UI.Button createLobbyButton;
 
 	private void Start()
     {
-        openLobbyButton.onClick.AddListener(OnOpenLobbyButtonClicked);
-		lobbyBackButton.onClick.AddListener(OnBackLobbyButtonClicked);
 		createLobbyButton.onClick.AddListener(OnCreateLobbyButtonClicked);
 
 	}
-
-	private void OnOpenLobbyButtonClicked()
-	{
-		createLobbyPanel.SetActive(true);
-		serverListPanel.SetActive(false);
-	}
-	private void OnBackLobbyButtonClicked() 
-	{
-		createLobbyPanel.SetActive(false);
-		serverListPanel.SetActive(true);
-	}
-	
 	private async void OnCreateLobbyButtonClicked()
 	{
 		Int32.TryParse(maxPlayerField.text, out int j);

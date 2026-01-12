@@ -6,6 +6,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Core;
 using System.Collections;
+using Unity.Services.Core.Environments;
 
 public class LobbyManager : Singleton<LobbyManager>
 {
@@ -13,9 +14,12 @@ public class LobbyManager : Singleton<LobbyManager>
     private Coroutine _heartbeatCoroutine;
     private Coroutine _refreshLobbyCoroutine;
 
-    public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
+	public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
     {
-        if(UnityServices.State != ServicesInitializationState.Initialized)
+		var options = new InitializationOptions();
+		options.SetEnvironmentName("production");
+
+		if (UnityServices.State != ServicesInitializationState.Initialized)
             await UnityServices.InitializeAsync();
 
         if(!AuthenticationService.Instance.IsSignedIn)
@@ -28,7 +32,7 @@ public class LobbyManager : Singleton<LobbyManager>
             playerData
         );
 
-        CreateLobbyOptions options = new CreateLobbyOptions
+        CreateLobbyOptions lobbyOptions = new CreateLobbyOptions
         {
             IsPrivate = isPrivate,
 
@@ -37,7 +41,7 @@ public class LobbyManager : Singleton<LobbyManager>
 
         try
         {
-			_lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
+			_lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, lobbyOptions);
 		} catch (System.Exception e)
         {
             Debug.LogError($"Failed to create lobby: {e}");
