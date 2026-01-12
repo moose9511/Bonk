@@ -9,7 +9,7 @@ using System.Collections;
 
 public class LobbyManager : Singleton<LobbyManager>
 {
-    private Lobby _lobby;
+    public Lobby _lobby;
     private Coroutine _heartbeatCoroutine;
     private Coroutine _refreshLobbyCoroutine;
 

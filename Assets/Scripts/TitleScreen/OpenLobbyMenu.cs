@@ -44,10 +44,10 @@ public class OpenLobbyMenu : MonoBehaviour
 
 		bool success = await GameLobbyManager.Instance.CreateLobby(serverNameField.text, j);
 
-		if(success)
-		{
-			SceneManager.LoadScene("map1");
-		}
+		//if(success)
+		//{
+		//	SceneManager.LoadScene("map1");
+		//}
 	}
 
 
