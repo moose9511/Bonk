@@ -9,6 +9,7 @@ using System.Collections;
 using Unity.Services.Core.Environments;
 using TMPro;
 using UnityEngine.UI;
+using Unity.Netcode;
 
 public class LobbyItem : MonoBehaviour
 {
@@ -16,11 +17,10 @@ public class LobbyItem : MonoBehaviour
 
 	bool isJoining = false;
 
-	[SerializeField] private TextMeshProUGUI lobbyNameText;
-    [SerializeField] private TextMeshProUGUI playerCountText;
-    [SerializeField] private Button joinBtn;
+	[SerializeField] public TextMeshProUGUI lobbyNameText;
+    [SerializeField] public TextMeshProUGUI playerCountText;
 
-	public async void JoinAsync(Lobby lobby)
+	public async void JoinAsync()
 	{
 		if (isJoining)
 			return;
@@ -29,8 +29,9 @@ public class LobbyItem : MonoBehaviour
 		try
 		{
 			Lobby joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
+			NetworkManager.Singleton.StartClient();
 
-			Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
+            Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
 		}
 		catch (System.Exception e)
 		{

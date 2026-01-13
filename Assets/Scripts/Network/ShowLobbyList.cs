@@ -36,6 +36,8 @@ public class ShowLobbyList : MonoBehaviour
         {
             await UnityServices.InitializeAsync();
 
+            AuthenticationService.Instance.ClearSessionToken();
+
             await Unity.Services.Authentication.AuthenticationService.Instance.SignInAnonymouslyAsync();
             Debug.Log("Signed in as: " + AuthenticationService.Instance.PlayerId);
         }
@@ -62,12 +64,13 @@ public class ShowLobbyList : MonoBehaviour
             foreach (Lobby lobby in lobbies.Results)
             {
                 GameObject entry = Instantiate(lobbyEntryPrefab, lobbyScrollView.content);
-				TextMeshProUGUI[] texts = entry.GetComponentsInChildren<TextMeshProUGUI>();
+				LobbyItem lobbyItem = entry.GetComponent<LobbyItem>();
 
-                texts[0].text = $"({lobby.Players.Count}/{lobby.MaxPlayers})";
-                texts[1].text = lobby.Name;
+                lobbyItem.lobby = lobby;
+                lobbyItem.lobbyNameText.text = lobby.Name; 
+                lobbyItem.playerCountText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
 
-				Debug.Log($"Lobby Name: {lobby.Name}, Lobby ID: {lobby.Id}, Players: {lobby.Players.Count}/{lobby.MaxPlayers}");
+                Debug.Log($"Lobby Name: {lobby.Name}, Lobby ID: {lobby.Id}, Players: {lobby.Players.Count}/{lobby.MaxPlayers}");
 			}
 
             await Task.Delay(5000); // Refresh every 5 seconds

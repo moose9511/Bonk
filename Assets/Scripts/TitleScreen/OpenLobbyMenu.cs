@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -28,10 +29,11 @@ public class OpenLobbyMenu : MonoBehaviour
 
 		bool success = await GameLobbyManager.Instance.CreateLobby(serverNameField.text, j);
 
-		//if(success)
-		//{
-		//	SceneManager.LoadScene("map1");
-		//}
+		if(success)
+		{
+			NetworkManager.Singleton.StartHost();
+            SceneManager.LoadScene("WaitingRoom");
+		}
 	}
 
 

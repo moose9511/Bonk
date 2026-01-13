@@ -145,6 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6880802313188656861}
+  - component: {fileID: 4532220142751469413}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -169,6 +170,18 @@ Transform:
   - {fileID: 2520585138051923320}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4532220142751469413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1612738233935670370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 884638e2dd74f054aa9f4a9407c73490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2116875816863555751
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,7 +436,6 @@ GameObject:
   - component: {fileID: 2259679466117297876}
   - component: {fileID: 8615749600183498921}
   - component: {fileID: 4092073057706490840}
-  - component: {fileID: 1887791230761060352}
   m_Layer: 5
   m_Name: NetworkUI
   m_TagString: Player
@@ -515,21 +527,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &1887791230761060352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5297194422531578326}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6ebe8ab8c3d90745aa320a14ea46130, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hostBtn: {fileID: 3811710975980313648}
-  serverBtn: {fileID: 0}
-  clientBtn: {fileID: 7785357351741536707}
 --- !u!1 &8294278660566142058
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,7 +708,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2566889291
+  GlobalObjectIdHash: 1354662893
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
