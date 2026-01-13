@@ -32,7 +32,7 @@ public class OpenLobbyMenu : MonoBehaviour
 		if(success)
 		{
 			NetworkManager.Singleton.StartHost();
-            SceneManager.LoadScene("WaitingRoom");
+			NetworkManager.Singleton.SceneManager.LoadScene("WaitingRoom", LoadSceneMode.Single);
 		}
 	}
 

@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -86,7 +87,8 @@ public class Player : NetworkBehaviour
             SpawnProjServerRpc(values);
         }
     }
-	
+
+
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void SpawnProjServerRpc(float[] values)
 	{
@@ -105,5 +107,7 @@ public class Player : NetworkBehaviour
 	{
 		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
+
+	
 }
 
