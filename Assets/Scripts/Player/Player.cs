@@ -40,6 +40,7 @@ public class Player : NetworkBehaviour
 			health.OnValueChanged += OnHealthChanged;
 			canvas.SetActive(true);
 		}
+
     }
 
 	private void OnHealthChanged(float oldValue, float newValue)
@@ -63,7 +64,10 @@ public class Player : NetworkBehaviour
 	public void Update()
     {
 		if(!IsOwner) return;
-
+		if(Input.GetKeyDown(KeyCode.F))
+		{
+			transform.position = new Vector3(0, 10, 0);	
+        }
 		// checks to see if player has collided with a pickup
 		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, pickupMask);
 		foreach (Collider coll in pickups)

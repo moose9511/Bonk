@@ -3,26 +3,35 @@ using UnityEngine;
 
 public class CustomPlayerSpawner : MonoBehaviour
 {
-	private void Start()
+	[SerializeField] private GameObject playerPrefab;
+	private void Awake()
 	{
-		NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-	}
+		if(NetworkManager.Singleton == null) return;
+
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+
+		foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+		{
+			OnClientConnected(clientId);
+        }
+    }
 
 	private void OnClientConnected(ulong clientId)
 	{
-		if (!NetworkManager.Singleton.IsServer)
-			return;
-
-		// Pick a spawn point based on join order
-		int index = NetworkManager.Singleton.ConnectedClients.Count - 1;
-
-		Vector3 spawnPos = Vector3.zero;
+		Debug.Log($"Client connected: {clientId}");
+        Vector3 spawnPos = Vector3.zero;
 
 		// Spawn the player manually
-		var playerPrefab = NetworkManager.Singleton.NetworkConfig.PlayerPrefab;
-		var playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+		var playerInstance = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
 		playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 	}
+
+	public void ConnectClient(ulong clientId, GameObject playerPrefab)
+	{
+		Debug.Log("im i doing anyting");
+        var playerInstance = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+    }
 }
 

@@ -28,13 +28,11 @@ public class PlayerMovement2 : NetworkBehaviour
     private Collider col;
     private Player player;
 
-    [SerializeField] private Vector3 mapPos;
     public override void OnNetworkSpawn()
     {
         col = GetComponent<Collider>();
         player = GetComponent<Player>();
 
-        GoTo(new Vector3(mapPos.x, mapPos.y + 20, mapPos.z));
     }
 
     void Update()
@@ -82,7 +80,6 @@ public class PlayerMovement2 : NetworkBehaviour
             Vector3 speed = bodySpeed.getVelocity();
             Vector3 scaled = Vector3.Scale(normalDiff, speed);
             
-            Debug.Log("speed: " + speed + " scale " + scaled + " diff " + normalDiff);
             // only adds force if it will increase the player's current extraforce
             if (scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
 				extraForce += speed - scaled;
@@ -96,9 +93,10 @@ public class PlayerMovement2 : NetworkBehaviour
             
 
         // removes extraforce in direction of walls
-        if (extraForce.magnitude > 0 && Physics.SphereCast(transform.position, .5f, extraForce.normalized, out RaycastHit hitInfo, .3f))
+        if (extraForce.magnitude > 0 && Physics.SphereCast(transform.position, .5f, extraForce.normalized, out RaycastHit hitInfo, .3f, LayerMask.GetMask("Ground")))
         {
             Vector3 stoppingForce = extraForce;
+
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
             stoppingForce -= extraForce;
 
@@ -226,10 +224,6 @@ public class PlayerMovement2 : NetworkBehaviour
         extraForce += force;
 	}
 
-    public void GoTo(Vector3 pos)
-    {
-        transform.position = pos;
-    }
 	private void OnDrawGizmos()
     {
         //Gizmos.DrawRay(transform.position, Vector3.down * 1.1f);
