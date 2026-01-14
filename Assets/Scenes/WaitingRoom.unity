@@ -260,7 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8181cced28a652544863076a2995024a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  teleportPosition: {x: 0, y: 0, z: 0}
+  teleportPosition: {x: 0, y: 16.82, z: 0}
 --- !u!65 &965740256
 BoxCollider:
   m_ObjectHideFlags: 0

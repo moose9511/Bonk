@@ -21,11 +21,12 @@ public class LobbyManager : Singleton<LobbyManager>
     private Coroutine _refreshLobbyCoroutine;
 
 	[SerializeField] public ScrollRect lobbyScrollView;
-	public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
+    [SerializeField] private GameObject lobbyEntryPrefab;
+    public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
     {
         var options = new InitializationOptions();
         options.SetEnvironmentName("production");
-
+        
         if (UnityServices.State != ServicesInitializationState.Initialized)
             await UnityServices.InitializeAsync();
 
@@ -44,6 +45,11 @@ public class LobbyManager : Singleton<LobbyManager>
             IsPrivate = isPrivate,
 
             Player = player,
+
+            Data = new Dictionary<string, DataObject> { 
+                    { "JoinCode", new DataObject(DataObject.VisibilityOptions.Public, "") 
+                } 
+            }
         };
 
         try
@@ -67,10 +73,12 @@ public class LobbyManager : Singleton<LobbyManager>
     private Dictionary<string, PlayerDataObject> SerializePlayerData(Dictionary<string, string> data)
     {
         Dictionary<string, PlayerDataObject> playerData = new Dictionary<string, PlayerDataObject>();
+
+        // Serialize each key-value pair into PlayerDataObject
         foreach (var (key, value) in data)
         {
             playerData.Add(key, new PlayerDataObject(
-                visibility: PlayerDataObject.VisibilityOptions.Member,
+                visibility: PlayerDataObject.VisibilityOptions.Public,
                 value: value));
         }
 
@@ -127,10 +135,20 @@ public class LobbyManager : Singleton<LobbyManager>
 				allocation.ConnectionData
 				);
 
-			NetworkManager.Singleton.StartHost();
-			NetworkManager.Singleton.SceneManager.LoadScene("WaitingRoom", LoadSceneMode.Single);
+            await LobbyService.Instance.UpdateLobbyAsync(_lobby.Id, new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject>
+                {
+                    ["JoinCode"] = new DataObject(
+                    DataObject.VisibilityOptions.Public,
+                    joinCode)
+                }
+            });
 
-			Debug.Log($"Relay created. Join code: {joinCode}");
+
+            NetworkManager.Singleton.StartHost();
+			NetworkManager.Singleton.SceneManager.LoadScene("WaitingRoom", LoadSceneMode.Single);
+            Debug.Log($"Relay created. Join code: {joinCode}");
 		}
         catch (RelayServiceException e)
         {

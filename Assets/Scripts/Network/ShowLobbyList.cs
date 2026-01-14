@@ -69,8 +69,14 @@ public class ShowLobbyList : MonoBehaviour
                 lobbyItem.lobby = lobby;
                 lobbyItem.lobbyNameText.text = lobby.Name; 
                 lobbyItem.playerCountText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
+                lobby.Data.TryGetValue("JoinCode", out var joinCodeData);
 
-                Debug.Log("Lobby found, join code: " + lobbyItem.joinCode);
+                if(joinCodeData != null && !joinCodeData.Equals(""))
+                    lobbyItem.joinCode = joinCodeData.Value;
+                else
+                    Debug.Log("Join code not found in lobby data.");
+
+                    Debug.Log("Lobby found, join code: " + lobbyItem.joinCode);
 			}
 
             await Task.Delay(5000); // Refresh every 5 seconds

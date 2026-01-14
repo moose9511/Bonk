@@ -179,6 +179,10 @@ PrefabInstance:
       propertyPath: lobbyScrollView
       value: 
       objectReference: {fileID: 629321202}
+    - target: {fileID: 8824787448928192234, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: lobbyEntryPrefab
+      value: 
+      objectReference: {fileID: 1551504959491228744, guid: c64287ff3ccfd12469372babd7725d54, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
