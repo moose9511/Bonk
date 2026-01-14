@@ -20,6 +20,8 @@ public class LobbyItem : MonoBehaviour
 	[SerializeField] public TextMeshProUGUI lobbyNameText;
     [SerializeField] public TextMeshProUGUI playerCountText;
 
+	public string joinCode;
+
 	public async void JoinAsync()
 	{
 		if (isJoining)
@@ -29,9 +31,9 @@ public class LobbyItem : MonoBehaviour
 		try
 		{
 			Lobby joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
-			NetworkManager.Singleton.StartClient();
+			LobbyManager.Instance.JoinRelay(joinCode);
 
-            Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
+			Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
 		}
 		catch (System.Exception e)
 		{

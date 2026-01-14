@@ -70,7 +70,7 @@ public class ShowLobbyList : MonoBehaviour
                 lobbyItem.lobbyNameText.text = lobby.Name; 
                 lobbyItem.playerCountText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
 
-                Debug.Log($"Lobby Name: {lobby.Name}, Lobby ID: {lobby.Id}, Players: {lobby.Players.Count}/{lobby.MaxPlayers}");
+                Debug.Log("Lobby found, join code: " + lobbyItem.joinCode);
 			}
 
             await Task.Delay(5000); // Refresh every 5 seconds

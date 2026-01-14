@@ -175,6 +175,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8824787448928192234, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: lobbyScrollView
+      value: 
+      objectReference: {fileID: 629321202}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1230,7 +1234,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -3.8496094, y: -7.170807}
+  m_AnchoredPosition: {x: -3.8495483, y: -7.170807}
   m_SizeDelta: {x: -469.1117, y: -185.6584}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &907900945
@@ -2628,6 +2632,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1605183082}
   m_CullTransparentMesh: 1
+--- !u!114 &1620256135 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8824787448928192234, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+  m_PrefabInstance: {fileID: 133727216}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d1ac8d9c2046e458b1e10c3e5eac6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1694888918
 GameObject:
   m_ObjectHideFlags: 0
@@ -3293,7 +3308,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1908935328}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1620256135}
+        m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
+        m_MethodName: CreateRelay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 0
 --- !u!114 &1908935328
 MonoBehaviour:
   m_ObjectHideFlags: 0
