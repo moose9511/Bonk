@@ -7,23 +7,13 @@ public class CameraMovement : NetworkBehaviour
     private float xrot, yrot;
     private float lastXRot, lastYRot;
 
-    private bool useSceneCam = false;
+    public bool useSceneCam = false;
     private bool enableMovement = true;
 
     NetworkVariable<float> sensitivity = new(3f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     void Update()
     {
         if (!IsOwner || !enableMovement) return;
-
-        if (useSceneCam)
-        {
-            sceneCam.enabled = true;
-            cam.enabled = false;
-        } else
-        {
-            sceneCam.enabled = false;
-            cam.enabled = true;
-        }
 
         float mousex = Input.GetAxis("Mouse X") * sensitivity.Value;
         float mousey = Input.GetAxis("Mouse Y") * sensitivity.Value;
@@ -40,11 +30,19 @@ public class CameraMovement : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if(!IsOwner) return;
+		cam = GetComponentInChildren<Camera>();
+		sceneCam = FindAnyObjectByType<SceneCam>().GetComponent<Camera>();
+		var audioListener = GetComponentInChildren<AudioListener>();
 
-        cam = GetComponentInChildren<Camera>();
-        var sceneCamObj = FindAnyObjectByType<SceneCam>();
-        sceneCam = sceneCamObj.GetComponent<Camera>();
+		if (!IsOwner)
+        {
+			cam.enabled = false;
+			
+			audioListener.enabled = false;
+
+			enabled = false;
+			return;
+		}
 
         transform.position += new Vector3(0, 1.5f, 0);
 		Cursor.lockState = CursorLockMode.Locked;
@@ -53,16 +51,22 @@ public class CameraMovement : NetworkBehaviour
         xrot = cam.transform.localEulerAngles.x;
         yrot = transform.localEulerAngles.y;
 
-        if(gameObject.scene.name == "WaitingRoom")
+        if (gameObject.scene.name == "WaitingRoom")
         {
+            Debug.Log("Using Scene Cam in Waiting Room");
             useSceneCam = true;
             UseCorrectCameras();
         }
+        else
+        {
+            useSceneCam = false;
+            UseCorrectCameras();
+		}
     }
 
     public void UseCorrectCameras()
     {
-        if(!IsOwner) return;
+        if (!IsOwner) return;
 
         if (useSceneCam)
         {

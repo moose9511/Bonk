@@ -38,7 +38,16 @@ public class Player : NetworkBehaviour
 		else
 		{
 			health.OnValueChanged += OnHealthChanged;
-			canvas.SetActive(true);
+
+			if (gameObject.scene.name == "WaitingRoom")
+			{
+				canvas.SetActive(false);
+			}
+			else
+			{
+				canvas.SetActive(true);
+			}
+				
 		}
 
     }
@@ -116,5 +125,6 @@ public class Player : NetworkBehaviour
 	{
 		canvas.SetActive(state);
     }
+
 }
 

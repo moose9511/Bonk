@@ -6,6 +6,7 @@ public class CustomPlayerSpawner : NetworkBehaviour
     [SerializeField] private GameObject playerPrefab;
 
     [SerializeField] private Quaternion spawnQuaternion;
+    [SerializeField] private Transform spawnTransform;
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -33,11 +34,9 @@ public class CustomPlayerSpawner : NetworkBehaviour
     {
         Debug.Log($"Spawning player for client {clientId}");
 
-        var playerInstance = Instantiate(playerPrefab, Vector3.zero, spawnQuaternion);
+        var playerInstance = Instantiate(playerPrefab, spawnTransform.position, spawnQuaternion);
 
         playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
-        playerInstance.GetComponent<Player>().EnableCanvas(false);
-
-
-    }
+           
+	}
 }
