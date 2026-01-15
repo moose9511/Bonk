@@ -750,13 +750,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1735364847}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f015e3cc0668414d85533e1e7c71df9, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f9876986e3b99149839a176c529e1ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  playerPrefab: {fileID: 714127207263417080, guid: a95c46b371de58746b1aab83a42ddb14, type: 3}
-  spawnQuaternion: {x: 0, y: 0, z: 0, w: 0}
-  spawnTransform: {fileID: 1735364848}
 --- !u!4 &1987830038 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6535432448234037239, guid: ac61332a4d0fc4e4d9f9d3af3b7978e5, type: 3}
