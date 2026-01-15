@@ -3,13 +3,27 @@ using Unity.Netcode;
 public class CameraMovement : NetworkBehaviour
 {
     private Camera cam;
+    [SerializeField] public Camera sceneCam;
     private float xrot, yrot;
     private float lastXRot, lastYRot;
+
+    private bool useSceneCam = false;
+    private bool enableMovement = true;
 
     NetworkVariable<float> sensitivity = new(3f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     void Update()
     {
-        if (!IsOwner) return;
+        if (!IsOwner || !enableMovement) return;
+
+        if (useSceneCam)
+        {
+            sceneCam.enabled = true;
+            cam.enabled = false;
+        } else
+        {
+            sceneCam.enabled = false;
+            cam.enabled = true;
+        }
 
         float mousex = Input.GetAxis("Mouse X") * sensitivity.Value;
         float mousey = Input.GetAxis("Mouse Y") * sensitivity.Value;
@@ -26,7 +40,11 @@ public class CameraMovement : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        if(!IsOwner) return;
+
         cam = GetComponentInChildren<Camera>();
+        var sceneCamObj = FindAnyObjectByType<SceneCam>();
+        sceneCam = sceneCamObj.GetComponent<Camera>();
 
         transform.position += new Vector3(0, 1.5f, 0);
 		Cursor.lockState = CursorLockMode.Locked;
@@ -35,15 +53,31 @@ public class CameraMovement : NetworkBehaviour
         xrot = cam.transform.localEulerAngles.x;
         yrot = transform.localEulerAngles.y;
 
-        if (!IsOwner)
+        if(gameObject.scene.name == "WaitingRoom")
         {
-            if(cam != null)
-                cam.enabled = false;
+            useSceneCam = true;
+            UseCorrectCameras();
         }
-        else
+    }
+
+    public void UseCorrectCameras()
+    {
+        if(!IsOwner) return;
+
+        if (useSceneCam)
         {
-            if(cam != null)
-                cam.enabled = true;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            sceneCam.enabled = true;
+            cam.enabled = false;
+            enableMovement = false;
+        } else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            sceneCam.enabled = false;
+            cam.enabled = true;
+            enableMovement = true;
         }
     }
 }

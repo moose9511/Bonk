@@ -112,6 +112,9 @@ public class Player : NetworkBehaviour
 		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
 
-	
+	public void EnableCanvas(bool state)
+	{
+		canvas.SetActive(state);
+    }
 }
 

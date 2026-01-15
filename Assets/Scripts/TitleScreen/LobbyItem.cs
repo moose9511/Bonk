@@ -31,7 +31,13 @@ public class LobbyItem : MonoBehaviour
 		try
 		{
 			Lobby joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
-			LobbyManager.Instance.JoinRelay(joinCode);
+			bool worked = await LobbyManager.Instance.JoinRelay(joinCode);
+
+			if (!worked) { 
+				Debug.LogError("Failed to join relay after joining lobby.");
+				isJoining = false;
+                return;
+            }
 
 			Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
 		}

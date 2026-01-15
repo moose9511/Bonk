@@ -6,6 +6,7 @@ using Unity.Services.Core.Environments;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ShowLobbyList : MonoBehaviour
@@ -13,48 +14,36 @@ public class ShowLobbyList : MonoBehaviour
     [SerializeField] public ScrollRect lobbyScrollView;
 
     [SerializeField] private GameObject lobbyEntryPrefab;
-    [SerializeField] private TextMeshProUGUI lobbyName;
-    [SerializeField] private TextMeshProUGUI playerCount;
-    [SerializeField] private Button joinButton;
 
-	QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
+    QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
     {
         Count = 25,
         Filters = new System.Collections.Generic.List<QueryFilter>()
     };
-	public async void Start()
+	public void Start()
     {
         var options = new InitializationOptions();
 		options.SetEnvironmentName("production");
-
-		await InitializeUGS();
-		ShowLobbies();
-    }
-    private async Task InitializeUGS()
-    {
-        try
-        {
-            await UnityServices.InitializeAsync();
-
-            AuthenticationService.Instance.ClearSessionToken();
-
-            await Unity.Services.Authentication.AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log("Signed in as: " + AuthenticationService.Instance.PlayerId);
-        }
-        catch (System.Exception e)
-        { 
-            Debug.LogError($"Failed to initialize Unity Gaming Services: {e}");
-        }
+        ShowLobbies();
     }
     public async void ShowLobbies()
     {
-		while (Application.isPlaying) {
-			QueryResponse lobbies = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
+        while (true) {
+            if(!LobbyManager.Instance.imReadyForYou)
+            {
+                await Task.Delay(1000);
+                continue;
+            }
+
+            Debug.Log("Querying lobbies...");
+            QueryResponse lobbies = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
 
             if (lobbies != null)
             {
                 Debug.Log($"Found {lobbies.Results.Count} lobbies.");
-            } 
+            }
+
+            if (lobbyScrollView == null) return;
 
             foreach (Transform child in lobbyScrollView.content)
             {
@@ -63,6 +52,7 @@ public class ShowLobbyList : MonoBehaviour
 
             foreach (Lobby lobby in lobbies.Results)
             {
+                if (lobbyScrollView == null) return;
                 GameObject entry = Instantiate(lobbyEntryPrefab, lobbyScrollView.content);
 				LobbyItem lobbyItem = entry.GetComponent<LobbyItem>();
 

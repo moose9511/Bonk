@@ -1,37 +1,43 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class CustomPlayerSpawner : MonoBehaviour
+public class CustomPlayerSpawner : NetworkBehaviour
 {
-	[SerializeField] private GameObject playerPrefab;
-	private void Awake()
-	{
-		if(NetworkManager.Singleton == null) return;
+    [SerializeField] private GameObject playerPrefab;
 
+    [SerializeField] private Quaternion spawnQuaternion;
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        // Only the server should handle spawning
+        if (!IsServer) return;
+
+        Debug.Log("CustomPlayerSpawner: OnNetworkSpawn - Subscribing to client connected callback");
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
 
-		foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
-		{
-			OnClientConnected(clientId);
+        // Spawn for already connected clients (host included)
+        foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
+        {
+            SpawnPlayer(clientId);
         }
     }
 
-	private void OnClientConnected(ulong clientId)
-	{
-		Debug.Log($"Client connected: {clientId}");
-        Vector3 spawnPos = Vector3.zero;
+    private void OnClientConnected(ulong clientId)
+    {
+        if (!IsServer) return;
+        SpawnPlayer(clientId);
+    }
 
-		// Spawn the player manually
-		var playerInstance = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+    private void SpawnPlayer(ulong clientId)
+    {
+        Debug.Log($"Spawning player for client {clientId}");
 
-		playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
-	}
+        var playerInstance = Instantiate(playerPrefab, Vector3.zero, spawnQuaternion);
 
-	public void ConnectClient(ulong clientId, GameObject playerPrefab)
-	{
-		Debug.Log("im i doing anyting");
-        var playerInstance = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        playerInstance.GetComponent<Player>().EnableCanvas(false);
+
+
     }
 }
-

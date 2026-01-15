@@ -22,16 +22,37 @@ public class LobbyManager : Singleton<LobbyManager>
 
 	[SerializeField] public ScrollRect lobbyScrollView;
     [SerializeField] private GameObject lobbyEntryPrefab;
-    public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
+
+    public QueryResponse lobbies { get; private set; }
+    QueryLobbiesOptions queryOptions = new QueryLobbiesOptions
     {
-        var options = new InitializationOptions();
-        options.SetEnvironmentName("production");
-        
+        Count = 25,
+        Filters = new List<QueryFilter>()
+    };
+
+    public bool imReadyForYou { get; private set; } = false;
+
+    private async void Awake()
+    {
         if (UnityServices.State != ServicesInitializationState.Initialized)
             await UnityServices.InitializeAsync();
 
+        AuthenticationService.Instance.ClearSessionToken();
         if (!AuthenticationService.Instance.IsSignedIn)
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        Debug.Log($"Signed in as player: {AuthenticationService.Instance.PlayerId}");   
+        imReadyForYou = true;
+    }
+    public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
+    {
+        if(!imReadyForYou)
+        {
+            Debug.LogError("LobbyManager not ready yet.");
+            return false;
+        }
+
+        var options = new InitializationOptions();
+        options.SetEnvironmentName("production");
 
         Dictionary<string, PlayerDataObject> playerData = SerializePlayerData(data);
         var player = new Unity.Services.Lobbies.Models.Player(
@@ -47,7 +68,8 @@ public class LobbyManager : Singleton<LobbyManager>
             Player = player,
 
             Data = new Dictionary<string, DataObject> { 
-                    { "JoinCode", new DataObject(DataObject.VisibilityOptions.Public, "") 
+                {
+                    "JoinCode", new DataObject(DataObject.VisibilityOptions.Public, "") 
                 } 
             }
         };
@@ -64,8 +86,8 @@ public class LobbyManager : Singleton<LobbyManager>
 
         Debug.Log($"Lobby created: {_lobby.Name} with ID: {_lobby.Id}");
 
-        _heartbeatCoroutine = StartCoroutine(LobbyHeartbeat(_lobby.Id, 6f));
-        _refreshLobbyCoroutine = StartCoroutine(RefreshLobby(_lobby.Id, 1f));
+        _heartbeatCoroutine = StartCoroutine(LobbyHeartbeat(_lobby.Id, 14f));
+        _refreshLobbyCoroutine = StartCoroutine(RefreshLobby(_lobby.Id, 3f));
 
         return true;
     }
@@ -108,12 +130,15 @@ public class LobbyManager : Singleton<LobbyManager>
         while (true)
         {
             Task<Lobby> task = LobbyService.Instance.GetLobbyAsync((string)id);
+
             yield return new WaitUntil(() => task.IsCompleted);
             Lobby newLobby = task.Result;
             if (newLobby.LastUpdated > _lobby.LastUpdated)
             {
                 _lobby = newLobby;
+                _lobby = newLobby;
             }
+
 
             yield return new WaitForSeconds(interval);
         }
@@ -123,9 +148,9 @@ public class LobbyManager : Singleton<LobbyManager>
     {
         try
         {
-            Allocation allocation = await Unity.Services.Relay.RelayService.Instance.CreateAllocationAsync(_lobby.MaxPlayers);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(_lobby.MaxPlayers);
 
-            string joinCode = await Unity.Services.Relay.RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
                 allocation.RelayServer.IpV4,
@@ -156,7 +181,7 @@ public class LobbyManager : Singleton<LobbyManager>
 		}
     }
 
-    public async void JoinRelay(string joinCode)
+    public async Task<bool> JoinRelay(string joinCode)
     {
         try
         {
@@ -171,12 +196,14 @@ public class LobbyManager : Singleton<LobbyManager>
                 allocation.HostConnectionData
 				);
 
-            NetworkManager.Singleton.StartClient();
 
+            NetworkManager.Singleton.StartClient();
+            return true;
 		}
         catch (RelayServiceException e)
         {
             Debug.LogError($"Failed to join relay: {e}");
+            return false;
 		}
     }
 }
