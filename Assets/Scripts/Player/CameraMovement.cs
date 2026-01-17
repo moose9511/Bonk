@@ -1,8 +1,9 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.SceneManagement;
 public class CameraMovement : NetworkBehaviour
 {
-    private Camera cam;
+    [SerializeField] private Camera cam;
     [SerializeField] public Camera sceneCam;
     private float xrot, yrot;
     private float lastXRot, lastYRot;
@@ -30,19 +31,19 @@ public class CameraMovement : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-		cam = GetComponentInChildren<Camera>();
 		sceneCam = FindAnyObjectByType<SceneCam>().GetComponent<Camera>();
-		var audioListener = GetComponentInChildren<AudioListener>();
 
 		if (!IsOwner)
         {
 			cam.enabled = false;
-			
-			audioListener.enabled = false;
-
 			enabled = false;
 			return;
 		}
+
+        Debug.Log(OwnerClientId + " player spawned on network spawned in camera movement on network spawn player");
+        var audioListener = GetComponentInChildren<AudioListener>();
+
+        NetworkManager.SceneManager.OnSceneEvent += OnSceneEvent;
 
         transform.position += new Vector3(0, 1.5f, 0);
 		Cursor.lockState = CursorLockMode.Locked;
@@ -50,23 +51,46 @@ public class CameraMovement : NetworkBehaviour
 
         xrot = cam.transform.localEulerAngles.x;
         yrot = transform.localEulerAngles.y;
-
-        if (gameObject.scene.name == "WaitingRoom")
-        {
-            Debug.Log("Using Scene Cam in Waiting Room");
-            useSceneCam = true;
-            UseCorrectCameras();
-        }
-        else
-        {
-            useSceneCam = false;
-            UseCorrectCameras();
-		}
     }
 
-    public void UseCorrectCameras()
+    private void OnSceneEvent(SceneEvent sceneEvent)
+    {
+        if (sceneEvent.SceneEventType == SceneEventType.LoadComplete &&
+            sceneEvent.ClientId == NetworkManager.LocalClientId)
+        {
+            Debug.Log(OwnerClientId + " Client finished loading scene: " + sceneEvent.SceneName);
+
+            if (sceneEvent.SceneName == "map1")
+            {
+                useSceneCam = false;
+                UseCorrectCameras();
+                var spawner = FindAnyObjectByType<CustomPlayerSpawner>();
+                transform.position = spawner.transform.position;
+                cam.transform.rotation = spawner.spawnQuaternion;
+                GetComponent<Player>().SetState("map1");
+
+                Debug.Log(OwnerClientId + " Client is now in map1");
+            } else
+            {
+                useSceneCam = true;
+                UseCorrectCameras();
+                var spawner = FindAnyObjectByType<CustomPlayerSpawner>();
+                transform.position = spawner.transform.position;
+                cam.transform.rotation = spawner.spawnQuaternion;
+                GetComponent<Player>().SetState("WaitingRoom");
+            }
+        }
+    }
+
+
+
+    public void UseCorrectCameras(bool useScene = true)
     {
         if (!IsOwner) return;
+        Debug.Log(OwnerClientId + " usescenecam: " + useSceneCam);
+        sceneCam = FindAnyObjectByType<SceneCam>().GetComponent<Camera>();
+
+        if (sceneCam == null) return;
 
         if (useSceneCam)
         {

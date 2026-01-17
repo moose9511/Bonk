@@ -3,6 +3,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class Player : NetworkBehaviour
@@ -24,11 +25,13 @@ public class Player : NetworkBehaviour
 	private NetworkVariable<int> weaponId = new(
 		-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
-	private Weapon currentWeapon = null;
+	public Weapon currentWeapon = null;
 
     public override void OnNetworkSpawn()
     {
-		// sets ground layer
+		
+		base.OnNetworkSpawn();
+        // sets ground layer
         groundLayer = LayerMask.NameToLayer("Ground");
 
 		// sets correct canvas for each player
@@ -37,9 +40,9 @@ public class Player : NetworkBehaviour
 		}
 		else
 		{
+			DontDestroyOnLoad(gameObject);
 			health.OnValueChanged += OnHealthChanged;
-
-			if (gameObject.scene.name == "WaitingRoom")
+			if (SceneManager.GetActiveScene().name == "WaitingRoom")
 			{
 				canvas.SetActive(false);
 			}
@@ -70,7 +73,13 @@ public class Player : NetworkBehaviour
 		health.Value = Mathf.Min(100f, health.Value + heal);
 	}
 
-	public void Update()
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+	public void DestroyPlayerServerRpc()
+	{
+		NetworkManager.Destroy(gameObject);
+    }
+
+    public void Update()
     {
 		if(!IsOwner) return;
 		if(Input.GetKeyDown(KeyCode.F))
@@ -83,12 +92,7 @@ public class Player : NetworkBehaviour
 		{
 			Pickup pickup = coll.gameObject.GetComponent<Pickup>();
 
-			WeaponPickup weaponPickup = coll.gameObject.GetComponent<WeaponPickup>();
-			if (weaponPickup != null)
-			{
-				currentWeapon = weaponPickup.WeaponData;
-				SetWeaponServerRpc(currentWeapon.weaponId);
-			}
+			currentWeapon = pickup.weapon;
 
             pickup.DieServerRpc();
 		}
@@ -121,10 +125,18 @@ public class Player : NetworkBehaviour
 		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
 
-	public void EnableCanvas(bool state)
+	public void SetState(string state)
 	{
-		canvas.SetActive(state);
-    }
+		if (!IsOwner) return;
+
+		if (state.Equals("map1"))
+		{
+			canvas.SetActive(true);
+		} else if (state.Equals("WaitingRoom"))
+		{
+			canvas.SetActive(false);
+		}
+	}
 
 }
 

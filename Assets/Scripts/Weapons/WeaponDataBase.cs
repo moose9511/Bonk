@@ -19,13 +19,14 @@ public class WeaponDataBase : NetworkBehaviour
         }
     }
 
-    private void Start()
-    {
-        
-    }
-
     public static Weapon GetWeaponById(int id)
     {
         return Weapons.ContainsKey(id) ? Weapons[id] : null;
+    }
+
+    public static Weapon GetRandomWeapon()
+    {
+        int randomId = Random.Range(0, Weapons.Count);
+        return Weapons[randomId];
     }
 }

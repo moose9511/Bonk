@@ -16,8 +16,22 @@ public class WaitingRoomStart : NetworkBehaviour
         beginBtn = GetComponent<Button>(); 
     }
 
+    private void Update()
+    {
+        if(!IsHost) return;
+        if(Input.GetKeyDown(KeyCode.B))
+        {
+            StartGame();
+        }
+    }
     public void StartGame()
     {
+        Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+        //foreach (var player in players)
+        //{
+        //    player.DestroyPlayerServerRpc();
+        //    Debug.Log("destory player");
+        //}
         NetworkManager.Singleton.SceneManager.LoadScene("map1", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 }

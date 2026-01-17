@@ -5,7 +5,7 @@ public class CustomPlayerSpawner : NetworkBehaviour
 {
     [SerializeField] private GameObject playerPrefab;
 
-    [SerializeField] private Quaternion spawnQuaternion;
+    [SerializeField] public Quaternion spawnQuaternion;
     [SerializeField] private Transform spawnTransform;
     public override void OnNetworkSpawn()
     {
@@ -14,8 +14,13 @@ public class CustomPlayerSpawner : NetworkBehaviour
         // Only the server should handle spawning
         if (!IsServer) return;
 
-        Debug.Log("CustomPlayerSpawner: OnNetworkSpawn - Subscribing to client connected callback");
         NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
+        {
+            if (NetworkManager.Singleton.ConnectedClients[id].PlayerObject == null)
+                Debug.LogError($"Client {id} has NO PlayerObject!");
+        };
+
 
         // Spawn for already connected clients (host included)
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds)
@@ -32,11 +37,16 @@ public class CustomPlayerSpawner : NetworkBehaviour
 
     private void SpawnPlayer(ulong clientId)
     {
-        Debug.Log($"Spawning player for client {clientId}");
+        if(gameObject.scene.name == "WaitingRoom")
+        {
+            //var playerInstance = Instantiate(playerPrefab, spawnTransform.position, spawnQuaternion);
 
-        var playerInstance = Instantiate(playerPrefab, spawnTransform.position, spawnQuaternion);
+            //playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        } else
+        {
 
-        playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+        }
            
 	}
+
 }

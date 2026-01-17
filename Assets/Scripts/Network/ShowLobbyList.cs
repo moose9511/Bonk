@@ -35,13 +35,7 @@ public class ShowLobbyList : MonoBehaviour
                 continue;
             }
 
-            Debug.Log("Querying lobbies...");
             QueryResponse lobbies = await LobbyService.Instance.QueryLobbiesAsync(queryOptions);
-
-            if (lobbies != null)
-            {
-                Debug.Log($"Found {lobbies.Results.Count} lobbies.");
-            }
 
             if (lobbyScrollView == null) return;
 
@@ -66,7 +60,6 @@ public class ShowLobbyList : MonoBehaviour
                 else
                     Debug.Log("Join code not found in lobby data.");
 
-                    Debug.Log("Lobby found, join code: " + lobbyItem.joinCode);
 			}
 
             await Task.Delay(5000); // Refresh every 5 seconds

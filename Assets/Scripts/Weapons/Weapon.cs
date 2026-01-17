@@ -1,8 +1,6 @@
 using UnityEngine;
 
-[System.Serializable]
-[CreateAssetMenu(fileName = "Weapon", menuName = "Scriptable Objects/Weapon")]
-public class Weapon : ScriptableObject
+public class Weapon : MonoBehaviour
 {
 	[SerializeField] public Mesh weaponMesh;
 	[SerializeField] public GameObject projPrefab;

@@ -39,7 +39,6 @@ public class LobbyItem : MonoBehaviour
                 return;
             }
 
-			Debug.Log($"Joined lobby: {joinedLobby.Name} with ID: {joinedLobby.Id}");
 		}
 		catch (System.Exception e)
 		{

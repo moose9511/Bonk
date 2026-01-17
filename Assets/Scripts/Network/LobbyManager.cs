@@ -37,10 +37,9 @@ public class LobbyManager : Singleton<LobbyManager>
         if (UnityServices.State != ServicesInitializationState.Initialized)
             await UnityServices.InitializeAsync();
 
-        AuthenticationService.Instance.ClearSessionToken();
+        //AuthenticationService.Instance.ClearSessionToken();
         if (!AuthenticationService.Instance.IsSignedIn)
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        Debug.Log($"Signed in as player: {AuthenticationService.Instance.PlayerId}");   
         imReadyForYou = true;
     }
     public async Task<bool> CreateLobby(string lobbyName, int maxPlayers, bool isPrivate, Dictionary<string, string> data)
@@ -119,7 +118,6 @@ public class LobbyManager : Singleton<LobbyManager>
     {
         while (true)
         {
-            Debug.Log("Sending lobby heartbeat ping...");
             LobbyService.Instance.SendHeartbeatPingAsync((string)id);
             yield return new WaitForSeconds(interval);
         }
@@ -173,7 +171,6 @@ public class LobbyManager : Singleton<LobbyManager>
 
             NetworkManager.Singleton.StartHost();
 			NetworkManager.Singleton.SceneManager.LoadScene("WaitingRoom", LoadSceneMode.Single);
-            Debug.Log($"Relay created. Join code: {joinCode}");
 		}
         catch (RelayServiceException e)
         {

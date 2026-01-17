@@ -13,6 +13,7 @@ public class MapSpawner : NetworkBehaviour
 
     private void OnClientConnected(ulong obj)
     {
+
 	}
 
     [ClientRpc]
