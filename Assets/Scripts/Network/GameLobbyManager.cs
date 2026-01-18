@@ -11,7 +11,7 @@ public class GameLobbyManager : Singleton<GameLobbyManager>
 
 		Dictionary<string, string> playerData = new Dictionary<string, string>()
 		{
-			{ "JoinCode", "" }
+			{ "JoinCode", null }
 		};
 
 		bool success = await LobbyManager.Instance.CreateLobby(lobbyName, maxPlayers, false, playerData);

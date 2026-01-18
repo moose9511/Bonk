@@ -15,7 +15,7 @@ public class PlayerMovement2 : NetworkBehaviour
     [SerializeField] private float hitboxOffset = .5f;
     [SerializeField] private float forceDampen = 1f;
     [SerializeField] private float gravity = -14.81f;
-    private Vector3 extraForce = Vector3.zero;
+    public Vector3 extraForce = Vector3.zero;
 
     private bool isGrounded;
     private RaycastHit groundHit;
@@ -219,7 +219,8 @@ public class PlayerMovement2 : NetworkBehaviour
 
     }
 
-    public void AddForce(Vector3 force)
+    [Rpc(SendTo.Owner)]
+    public void AddForceRpc(Vector3 force)
     {
         extraForce += force;
 	}

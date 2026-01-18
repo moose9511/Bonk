@@ -7,9 +7,10 @@ public class WeaponSpawner : NetworkBehaviour
     [SerializeField] private GameObject weaponPickupPrefab;
 
     [SerializeField] private float spawnInterval = 10f;
-    private float timer = 0f;
+    private float timer;
 
     private bool hasSpawned = false;
+    private GameObject pickupInstance;
 
     public override void OnNetworkSpawn()
     {
@@ -27,10 +28,18 @@ public class WeaponSpawner : NetworkBehaviour
             return;
         }
 
+        timer = spawnInterval;
+
     }
 
     private void FixedUpdate()
     {
+        if (!IsServer) return;
+        if(pickupInstance == null && hasSpawned == true)
+        {
+            hasSpawned = false;
+        }
+
         if(timer >= spawnInterval && !hasSpawned)
         {
             if (NetworkManager.Singleton == null) return;
@@ -44,16 +53,23 @@ public class WeaponSpawner : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void SpawnWeaponServerRpc()
     {
         Weapon weaponToSpawn = WeaponDataBase.GetRandomWeapon();
         if(weaponToSpawn != null)
         {
             Vector3 spawnPosition = transform.position + spawnOffset;
-            GameObject weaponInstance = Instantiate(weaponPickupPrefab, spawnPosition, Quaternion.identity);
-            weaponInstance.GetComponent<Pickup>().weapon = weaponToSpawn;
-            weaponInstance.GetComponent<NetworkObject>().Spawn(true);
+
+            pickupInstance = Instantiate(weaponPickupPrefab, spawnPosition, Quaternion.identity);
+            pickupInstance.GetComponent<NetworkObject>().Spawn(true);
+
+            var pickup = pickupInstance.GetComponent<Pickup>();
+
+            if (pickup != null)
+            {
+                pickupInstance.GetComponent<Pickup>().SetWeaponClientRpc(weaponToSpawn.weaponId);
+            }
         }
     }
 }

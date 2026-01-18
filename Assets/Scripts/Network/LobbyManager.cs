@@ -1,3 +1,4 @@
+//using ParrelSync;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -34,8 +35,15 @@ public class LobbyManager : Singleton<LobbyManager>
 
     private async void Awake()
     {
+        var initOptions = new InitializationOptions();
+
+        //if(ClonesManager.IsClone())
+        //{
+        //    initOptions.SetProfile("clone");
+        //    Debug.Log("CLONE DETECTED!!!");
+        //}
         if (UnityServices.State != ServicesInitializationState.Initialized)
-            await UnityServices.InitializeAsync();
+            await UnityServices.InitializeAsync(initOptions);
 
         //AuthenticationService.Instance.ClearSessionToken();
         if (!AuthenticationService.Instance.IsSignedIn)

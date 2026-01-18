@@ -12,9 +12,15 @@ public class Pickup : NetworkBehaviour
 
     }
 
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void DieServerRpc()
     {
 		gameObject.GetComponent<NetworkObject>().Despawn(true);
 	}
+
+    [ClientRpc]
+    public void SetWeaponClientRpc(int index)
+    {
+        weapon = WeaponDataBase.GetWeaponById(index);
+    }
 }

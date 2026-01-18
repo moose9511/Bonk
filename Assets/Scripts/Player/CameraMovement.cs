@@ -35,12 +35,12 @@ public class CameraMovement : NetworkBehaviour
 
 		if (!IsOwner)
         {
+            cam.GetComponent<AudioListener>().enabled = false; 
 			cam.enabled = false;
 			enabled = false;
 			return;
 		}
 
-        Debug.Log(OwnerClientId + " player spawned on network spawned in camera movement on network spawn player");
         var audioListener = GetComponentInChildren<AudioListener>();
 
         NetworkManager.SceneManager.OnSceneEvent += OnSceneEvent;
@@ -55,10 +55,11 @@ public class CameraMovement : NetworkBehaviour
 
     private void OnSceneEvent(SceneEvent sceneEvent)
     {
+        if (!IsOwner) return;
+
         if (sceneEvent.SceneEventType == SceneEventType.LoadComplete &&
             sceneEvent.ClientId == NetworkManager.LocalClientId)
         {
-            Debug.Log(OwnerClientId + " Client finished loading scene: " + sceneEvent.SceneName);
 
             if (sceneEvent.SceneName == "map1")
             {
@@ -69,8 +70,8 @@ public class CameraMovement : NetworkBehaviour
                 cam.transform.rotation = spawner.spawnQuaternion;
                 GetComponent<Player>().SetState("map1");
 
-                Debug.Log(OwnerClientId + " Client is now in map1");
-            } else
+            }
+            else
             {
                 useSceneCam = true;
                 UseCorrectCameras();
@@ -87,7 +88,6 @@ public class CameraMovement : NetworkBehaviour
     public void UseCorrectCameras(bool useScene = true)
     {
         if (!IsOwner) return;
-        Debug.Log(OwnerClientId + " usescenecam: " + useSceneCam);
         sceneCam = FindAnyObjectByType<SceneCam>().GetComponent<Camera>();
 
         if (sceneCam == null) return;

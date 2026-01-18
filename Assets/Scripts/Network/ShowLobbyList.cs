@@ -47,18 +47,20 @@ public class ShowLobbyList : MonoBehaviour
             foreach (Lobby lobby in lobbies.Results)
             {
                 if (lobbyScrollView == null) return;
+
+                lobby.Data.TryGetValue("JoinCode", out var joinCodeData);
+                if (joinCodeData == null || joinCodeData.Equals(""))
+                {
+                    return;
+                }
+
                 GameObject entry = Instantiate(lobbyEntryPrefab, lobbyScrollView.content);
 				LobbyItem lobbyItem = entry.GetComponent<LobbyItem>();
 
                 lobbyItem.lobby = lobby;
                 lobbyItem.lobbyNameText.text = lobby.Name; 
                 lobbyItem.playerCountText.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
-                lobby.Data.TryGetValue("JoinCode", out var joinCodeData);
-
-                if(joinCodeData != null && !joinCodeData.Equals(""))
-                    lobbyItem.joinCode = joinCodeData.Value;
-                else
-                    Debug.Log("Join code not found in lobby data.");
+                lobbyItem.joinCode = joinCodeData.Value;
 
 			}
 

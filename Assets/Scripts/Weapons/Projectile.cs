@@ -15,6 +15,7 @@ public class Projectile : NetworkBehaviour
      * 5: x
      * 6: y
      * 7: z
+     * 8: clientId
      * */
     private float[] values;
 
@@ -46,15 +47,16 @@ public class Projectile : NetworkBehaviour
         colliders = Physics.OverlapSphere(transform.position, values[4]);
         foreach (Collider hit in colliders)
         {
-            if (hit.gameObject.CompareTag("Player"))
+            if (hit.gameObject.CompareTag("Player") && hit.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
             {
-                hit.GetComponent<PlayerMovement2>()?.AddForce(direction * values[1]);
+                hit.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
                 hit.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
                 networkObject.Despawn();
             }
             else if (hit.gameObject.layer == Player.groundLayer)
             {
-                GetComponent<NetworkObject>().Despawn();
+                if(GetComponent<NetworkObject>().IsSpawned)
+                    GetComponent<NetworkObject>().Despawn();
             }
         }
     }

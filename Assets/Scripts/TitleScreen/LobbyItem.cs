@@ -30,6 +30,8 @@ public class LobbyItem : MonoBehaviour
 
 		try
 		{
+			if (joinCode == null || joinCode.Length == 0 || joinCode.Equals("")) return;
+
 			Lobby joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
 			bool worked = await LobbyManager.Instance.JoinRelay(joinCode);
 

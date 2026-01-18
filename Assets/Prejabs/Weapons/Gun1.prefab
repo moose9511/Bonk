@@ -47,14 +47,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponMesh: {fileID: -2432090755550338912, guid: 9f128ea891731634298e67a18fdac132, type: 3}
   projPrefab: {fileID: 2409600643230246329, guid: aa4f125a4f8cf574baeed3fc442cc01d, type: 3}
-  damage: 1
-  strength: 1
-  speed: 1
-  fireRate: 1
+  damage: 5
+  strength: 15
+  speed: 30
+  fireRate: 0.2
   lifeTime: 10
-  radius: 1
+  radius: 0.3
   weaponId: 0
-  distanceToShooter: 1.1
+  clientOwnerId: 0
+  distanceToShooter: 1.2
 --- !u!114 &2144164799200370017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,7 +68,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3077589107
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

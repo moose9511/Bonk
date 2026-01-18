@@ -13,10 +13,11 @@ public class Weapon : MonoBehaviour
 	[SerializeField] public float radius = 1f;
 
 	public int weaponId;
+	public int clientOwnerId;
 	public float distanceToShooter = 1.1f;
 
 	public float[] SerializeData(Vector3 direction)
 	{
-		return new float[] { damage, strength, speed, lifeTime, radius, direction.x, direction.y, direction.z };
+		return new float[] { damage, strength, speed, lifeTime, radius, direction.x, direction.y, direction.z, this.clientOwnerId};
 	}
 }
