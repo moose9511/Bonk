@@ -215,7 +215,7 @@ public class Player : NetworkBehaviour
 			if (shoot)
 			{
 				float[] values = currentWeapon.SerializeData(cam.transform.forward);
-				SpawnProjRpc(values, currentWeapon.weaponId);
+				SpawnProjServerRpc(values, currentWeapon.weaponId);
 				shootTime = 0;
 
 				Ammo -= 1;
