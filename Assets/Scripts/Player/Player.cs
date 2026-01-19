@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.Netcode;
@@ -13,16 +14,34 @@ public class Player : NetworkBehaviour
 	[SerializeField] public GameObject canvas;
 
 	[SerializeField] private TextMeshProUGUI healthText;
+	[SerializeField] private TextMeshProUGUI ammoCount;
+	[SerializeField] private TextMeshProUGUI powerText;
+	[SerializeField] private Button respawnBtn;
+	[SerializeField] private GameObject gunPointer;
 
     [SerializeField] private GameObject cam;
 
 	[SerializeField] private LayerMask pickupMask;
+	[SerializeField] private LayerMask boundsMask;
+
+	private Transform deadTransform;
 
 	public static int groundLayer;
 
-	private float shootInterval, shootTime;
+	private float shootInterval = 1, shootTime;
+	public int Ammo
+	{
+		get { return ammo; }
+		set
+		{
+			ammo = value;
+			ammoCount.text = ammo.ToString();
+		}
+	}
+	private int ammo;
 
 	public Vector3 respawnPos;
+	public Vector3 deadPos;
 
 	[SerializeField] private MeshFilter filter;
 
@@ -33,7 +52,6 @@ public class Player : NetworkBehaviour
 		-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
 	public Weapon currentWeapon = null;
-	public bool dead = false;
 
     public override void OnNetworkSpawn()
     {
@@ -50,6 +68,7 @@ public class Player : NetworkBehaviour
 		{
 			DontDestroyOnLoad(gameObject);
 			health.OnValueChanged += OnHealthChanged;
+
 			if (SceneManager.GetActiveScene().name == "WaitingRoom")
 			{
 				canvas.SetActive(false);
@@ -72,6 +91,7 @@ public class Player : NetworkBehaviour
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void TakeDamageServerRpc(float damage)
 	{
+		Debug.Log("take damage");
 		health.Value = Mathf.Max(0, health.Value - damage);
 	}
 
@@ -95,21 +115,10 @@ public class Player : NetworkBehaviour
     {
 		if(!IsOwner) return;
 
-        if (dead && health.Value > 0)
-		{
-			SetPosRpc(respawnPos.x, respawnPos.y, respawnPos.z);
-			dead = false;
-		} else if (dead)
-		{
-            SetPosRpc(-999999, 99999, -999999);
-            GetComponent<PlayerMovement2>().extraForce = Vector3.zero;
-            return;
-        }
-
-		if(health.Value <= 0)
+		if(health.Value < 0)
 		{
 			BeDead();
-		}
+		} 
 
 		// checks to see if player has collided with a pickup
 		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, pickupMask);
@@ -117,75 +126,220 @@ public class Player : NetworkBehaviour
 		{
 			Pickup pickup = coll.gameObject.GetComponent<Pickup>();
 
-			currentWeapon = pickup.weapon;
-			currentWeapon.clientOwnerId = (int)OwnerClientId;
+			if(pickup.isWeapon)
+			{
+                currentWeapon = pickup.weapon;
+                currentWeapon.clientOwnerId = (int)OwnerClientId;
+                Ammo = pickup.weapon.ammo;
 
-			shootInterval = currentWeapon.fireRate;
-			shootTime = shootInterval;
+                shootInterval = currentWeapon.fireRate;
+                shootTime = shootInterval;
+            } else if (pickup.isHealth)
+			{
+				GainHealthServerRpc(Mathf.Clamp(pickup.healthGained, 0, 100));
+			} else if (pickup.isPower)
+			{
+				int randPow = Random.Range(1, 4);
 
-            pickup.DieServerRpc();
+				switch(randPow)
+				{
+					case 1:
+						StartCoroutine(JumpPower(15));
+						break;
+					case 2:
+						StartCoroutine(SpeedPower(10));
+						break;
+					case 3:
+						StartCoroutine(HardPower(50));
+						break;
+					case 4:
+						ExtraHealthPowerServerRpc(200);
+						break;
+				}
+			}
+
+			pickup.DieServerRpc();
 		}
 
+        Collider[] outOfBounds = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, boundsMask);
+		if(outOfBounds.Length > 0)
+		{
+			BeDead();
+		}
 
-		if (currentWeapon == null) 
+        if (currentWeapon == null) 
 		{
 			filter.mesh = null;
-			return;
+			Ammo = 0;
+
+			if(Input.GetMouseButtonDown(0) && shootTime >= shootInterval)
+			{
+				shootTime = 0;
+                Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit punchHit, 2.5f);
+                if (punchHit.collider != null && punchHit.collider.CompareTag("Player"))
+                {
+					if (punchHit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId == OwnerClientId) return;
+
+                    punchHit.collider.gameObject.GetComponent<Player>().TakeDamageServerRpc(2);
+                    punchHit.collider.gameObject.GetComponent<PlayerMovement2>().AddForceRpc(cam.transform.forward * 20);
+                }
+            }
+            if (shootTime < shootInterval)
+                shootTime += Time.deltaTime;
+
+            return;
 		} else
 		{
-				filter.mesh = currentWeapon.weaponMesh;
-
+			filter.mesh = currentWeapon.weaponMesh;
 		}
 
 		if (shootTime >= shootInterval)
 		{
-			if (Input.GetMouseButtonDown(0))
+			bool shoot = false;
+			if(currentWeapon.isAutomatic)
+				shoot = Input.GetMouseButton(0);
+			else
+				shoot = Input.GetMouseButtonDown(0);
+
+			if (shoot)
 			{
 				float[] values = currentWeapon.SerializeData(cam.transform.forward);
 				SpawnProjServerRpc(values, currentWeapon.weaponId);
 				shootTime = 0;
+
+				Ammo -= 1;
+				if (Ammo <= 0)
+				{
+					currentWeapon = null;
+				}
 			}
 		}
 		else
 		{
-			shootTime += Time.deltaTime;
+			if(shootTime < shootInterval)
+				shootTime += Time.deltaTime;
 		}
 				
     }
 
-	public void BeDead()
+	public IEnumerator JumpPower(float jumpPower)
 	{
-        var playerSpawner = FindAnyObjectByType<SpawnPlayer>();
+		GetComponent<PlayerMovement2>().jumpSpeed += jumpPower;
+		for(int i = 40; i > 0; i--)
+		{
+			powerText.text = "+Jump :" + i;
+            yield return new WaitForSeconds(1);
+        }
 
+		powerText.text = "";
+		GetComponent<PlayerMovement2>().jumpSpeed -= jumpPower;
+	}
+    public IEnumerator SpeedPower(float speedPower)
+    {
+        GetComponent<PlayerMovement2>().moveSpeed += speedPower;
+        for (int i = 25; i > 0; i--)
+        {
+            powerText.text = "+Speed :" + i;
+            yield return new WaitForSeconds(1);
+        }
+        powerText.text = "";
+        GetComponent<PlayerMovement2>().moveSpeed -= speedPower;
+    }
+
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void ExtraHealthPowerServerRpc(float extra)
+    {
+		health.Value = extra;
+    }
+    public IEnumerator HardPower(float threshold)
+    {
+        GetComponent<PlayerMovement2>().hitThreshold += threshold;
+        for (int i = 45; i > 0; i--)
+        {
+            powerText.text = "+Durability :" + i;
+            yield return new WaitForSeconds(1);
+        }
+        powerText.text = "";
+        GetComponent<PlayerMovement2>().hitThreshold -= threshold;
+    }
+
+    public IEnumerator RespawnCountDown()
+    {
+		respawnBtn.gameObject.SetActive(true);
+		respawnBtn.enabled = true;
+        respawnBtn.interactable = false;
+
+        var text = respawnBtn.GetComponentInChildren<TextMeshProUGUI>();
+
+        for (int i = 3; i > 0; i--)
+        {
+            text.text = i.ToString();
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        respawnBtn.interactable = true;
+
+        text.text = "RESPAWN";
+    }
+
+    public void BeDead()
+	{
         var camMovement = GetComponent<CameraMovement>();
         camMovement.useSceneCam = true;
         camMovement.UseCorrectCameras();
 
-        canvas.SetActive(false);
+		GetComponent<PlayerMovement2>().extraForce = Vector3.zero;
 
-        StartCoroutine(playerSpawner.RespawnCountDown(gameObject, FindAnyObjectByType<CustomPlayerSpawner>().transform));
+		ammoCount.enabled = false;
+		healthText.enabled = false;
+		powerText.enabled = false;
+		respawnBtn.enabled = true;
+		currentWeapon = null;
+		gunPointer.SetActive(false);
 
-        SetPosRpc(-999999, 99999, -999999);
-        dead = true;
+		StopAllCoroutines();
+
+		ammo = -1;
+
+		transform.position = deadPos;
+
+        StartCoroutine(RespawnCountDown());
+
     }
 
-	[Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Everyone)]
-	public void SetPosRpc(float x, float y, float z)
+	public void Respawn()
 	{
-		transform.position = new Vector3(x, y, z);	
-	}
+        GainHealthServerRpc(100);
+		ammoCount.enabled = true;
+		healthText.enabled = true;
+		respawnBtn.gameObject.SetActive(false);
+        powerText.enabled = true;
+		gunPointer.SetActive(true);
 
-	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        GetComponent<PlayerMovement2>().extraForce = Vector3.zero;
+
+		transform.position = respawnPos;
+
+		respawnBtn.enabled = false;
+
+        var playercam = GetComponent<CameraMovement>();
+        playercam.useSceneCam = false;
+        playercam.UseCorrectCameras();
+    }
+
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void SpawnProjServerRpc(float[] values, int weaponId)
 	{
 		Weapon shotWeaon = WeaponDataBase.GetWeaponById(weaponId);
         var projObj = Instantiate(shotWeaon.projPrefab,
         cam.transform.position + cam.transform.forward * shotWeaon.distanceToShooter,
         Quaternion.identity);
+		projObj.transform.localScale = new Vector3(shotWeaon.radius, shotWeaon.radius, shotWeaon.radius);
 
-        var proj = projObj.GetComponent<Projectile>();
-        proj.GetComponent<NetworkObject>().Spawn(true);
-		
+		projObj.GetComponent<NetworkObject>().Spawn();
+		var proj = projObj.AddComponent<Projectile>();
+
 		proj.Init(values);
 	}
 

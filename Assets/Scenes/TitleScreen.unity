@@ -132,9 +132,33 @@ PrefabInstance:
       value: Managers
       objectReference: {fileID: 0}
     - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: weapons.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
       propertyPath: 'weapons.Array.data[0]'
       value: 
       objectReference: {fileID: 3090417447603805744, guid: e2891ce1ad2022b419b01e1e7d79348d, type: 3}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: 'weapons.Array.data[1]'
+      value: 
+      objectReference: {fileID: 3090417447603805744, guid: 949be1e8cafdb444dac65f4c6b7d944f, type: 3}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: 'weapons.Array.data[2]'
+      value: 
+      objectReference: {fileID: 3090417447603805744, guid: b3fce6346dda439499611ffa637e4529, type: 3}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: 'weapons.Array.data[3]'
+      value: 
+      objectReference: {fileID: 3090417447603805744, guid: 6a4b70f8c22220141b105f66ae97cf64, type: 3}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: 'weapons.Array.data[4]'
+      value: 
+      objectReference: {fileID: 3090417447603805744, guid: 197777053d703f94cb41b359f8e30224, type: 3}
+    - target: {fileID: 6041569216932138318, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
+      propertyPath: 'weapons.Array.data[5]'
+      value: 
+      objectReference: {fileID: 3090417447603805744, guid: 197777053d703f94cb41b359f8e30224, type: 3}
     - target: {fileID: 6440701200740259198, guid: b84466729db8d964ea33e9368efbbb6d, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 1354662893
@@ -352,8 +376,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1867179803}
   m_HandleRect: {fileID: 1867179802}
   m_Direction: 2
-  m_Value: 0.99999976
-  m_Size: 0.55363333
+  m_Value: 1
+  m_Size: 0.5536334
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -479,7 +503,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1605183083}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.9999999
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1328,7 +1352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -7.171112}
+  m_AnchoredPosition: {x: 0, y: -7.1711426}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &907900945
@@ -1585,7 +1609,7 @@ RectTransform:
   m_GameObject: {fileID: 1072644828}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1061, y: 1.1061, z: 1.1061}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1873913316}
@@ -3692,6 +3716,7 @@ GameObject:
   - component: {fileID: 2030196120}
   - component: {fileID: 2030196119}
   - component: {fileID: 2030196121}
+  - component: {fileID: 2030196122}
   m_Layer: 0
   m_Name: BootStrap
   m_TagString: Untagged
@@ -3752,6 +3777,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 714127207263417080, guid: a95c46b371de58746b1aab83a42ddb14, type: 3}
+--- !u!114 &2030196122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030196118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd328d9206147cf40a7156b81ffd3030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comGunTex: {fileID: 2100000, guid: 7d0b359fde654aa4a970adbbf1d033f1, type: 2}
+  legGunTex: {fileID: 2100000, guid: 23939496b22c3174cb59e3acdf6183ad, type: 2}
+  health1Tex: {fileID: 2100000, guid: d2fad96dcf90c3e4d8cc77c282201b29, type: 2}
+  health2Tex: {fileID: 2100000, guid: 87957de0444407f48a0b447b8a3e106d, type: 2}
+  health3Tex: {fileID: 2100000, guid: 50e641372f890f0439567086628bb5be, type: 2}
+  powerTex: {fileID: 2100000, guid: 8573ca37acc2016438280d8d0ec388ae, type: 2}
 --- !u!1 &2042390598
 GameObject:
   m_ObjectHideFlags: 0

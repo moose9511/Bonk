@@ -102,8 +102,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1551504959491228744}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.774938}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.6311}
+  m_LocalScale: {x: 0.62876, y: 0.62876, z: 0.62876}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7784029633345760506}
@@ -114,7 +114,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 98, y: 112.64935}
+  m_AnchoredPosition: {x: 0, y: -0.078186035}
   m_SizeDelta: {x: 367.6538, y: 49.5788}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1277271098945420543
@@ -169,6 +169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbyNameText: {fileID: 334870370849558145}
   playerCountText: {fileID: 4858114579661437659}
+  joinCode: 
 --- !u!1 &1778173822346957618
 GameObject:
   m_ObjectHideFlags: 0

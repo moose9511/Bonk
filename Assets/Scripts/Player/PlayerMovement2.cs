@@ -10,11 +10,13 @@ public class PlayerMovement2 : NetworkBehaviour
 {
     float hInput, vInput;
 
-    [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float jumpSpeed = 6f;
+    [SerializeField] public float moveSpeed = 10f;
+    [SerializeField] public float jumpSpeed = 6f;
     [SerializeField] private float hitboxOffset = .5f;
     [SerializeField] private float forceDampen = 1f;
     [SerializeField] private float gravity = -14.81f;
+    [SerializeField] public float hitThreshold = 4;
+    [SerializeField] private float hitMult = 1;
     public Vector3 extraForce = Vector3.zero;
 
     private bool isGrounded;
@@ -38,6 +40,7 @@ public class PlayerMovement2 : NetworkBehaviour
     void Update()
     {
         if (!IsOwner) return;
+        
 
         vInput = Input.GetAxisRaw("Vertical");
         hInput = Input.GetAxisRaw("Horizontal");
@@ -81,7 +84,7 @@ public class PlayerMovement2 : NetworkBehaviour
             Vector3 scaled = Vector3.Scale(normalDiff, speed);
             
             // only adds force if it will increase the player's current extraforce
-            if (scaled.magnitude < speed.magnitude && extraForce.magnitude < speed.magnitude)
+            if ((speed.magnitude - scaled.magnitude) < speed.magnitude && extraForce.magnitude < speed.magnitude)
 				extraForce += speed - scaled;
 		}
         else if (groundSpeed != null && extraForce.magnitude < groundSpeed.getVelocity().magnitude)
@@ -100,7 +103,10 @@ public class PlayerMovement2 : NetworkBehaviour
             extraForce = Vector3.ProjectOnPlane(extraForce, hitInfo.normal);
             stoppingForce -= extraForce;
 
-            player.TakeDamageServerRpc(stoppingForce.magnitude);
+            float hitDamage = stoppingForce.magnitude * hitMult;
+
+            if(hitDamage > hitThreshold)
+                player.TakeDamageServerRpc(hitDamage);
         }
 
         // gets any overlap in colliders and corrects it
@@ -148,7 +154,7 @@ public class PlayerMovement2 : NetworkBehaviour
 
         float angle = Vector3.Angle(Vector3.Normalize(horForce + lastMove), groundNormal);
         
-
+        // when the slope is going upwards relative to players movement
         if (angle >= 90f)
         {
             isGrounded = true;
@@ -158,7 +164,10 @@ public class PlayerMovement2 : NetworkBehaviour
                 Vector3 dir = ((transform.up * Mathf.Sin((angle - 90) * Mathf.Deg2Rad) * 
                     (horForce + lastMove * moveSpeed).magnitude) + Vector3.ProjectOnPlane(extraForce, transform.up));
 
-                extraForce = dir;
+                if (extraForce.y <= dir.y)
+                    extraForce = dir;
+                else
+                    isGrounded = false;
             }
             else
             {
@@ -173,7 +182,8 @@ public class PlayerMovement2 : NetworkBehaviour
                 return;
             }
 
-            extraForce = slopeDirection;
+            if(extraForce.y < 0)
+                extraForce = slopeDirection;
             isGrounded = true;
         }
         else
@@ -191,8 +201,11 @@ public class PlayerMovement2 : NetworkBehaviour
 
             // jump input
             if (Input.GetKey(KeyCode.Space))
+            {
                 extraForce += transform.up * jumpSpeed;
+            }
         }
+
         else
             extraForce += gravity * Time.deltaTime * transform.up;
 

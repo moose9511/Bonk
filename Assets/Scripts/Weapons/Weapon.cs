@@ -11,6 +11,8 @@ public class Weapon : MonoBehaviour
 	[SerializeField] public float fireRate = 1f;
 	[SerializeField] public float lifeTime = 10f;
 	[SerializeField] public float radius = 1f;
+	[SerializeField] public int ammo = 10;
+	[SerializeField] public bool isAutomatic = false;
 
 	public int weaponId;
 	public int clientOwnerId;

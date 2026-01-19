@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: cd328d9206147cf40a7156b81ffd3030
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - comGunTex: {fileID: 2100000, guid: 7d0b359fde654aa4a970adbbf1d033f1, type: 2}
+  - legGunTex: {fileID: 2100000, guid: 23939496b22c3174cb59e3acdf6183ad, type: 2}
+  - health1Tex: {fileID: 2100000, guid: d2fad96dcf90c3e4d8cc77c282201b29, type: 2}
+  - health2Tex: {fileID: 2100000, guid: 87957de0444407f48a0b447b8a3e106d, type: 2}
+  - health3Tex: {fileID: 2100000, guid: 50e641372f890f0439567086628bb5be, type: 2}
+  - powerTex: {fileID: 2100000, guid: 8573ca37acc2016438280d8d0ec388ae, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -56,20 +56,48 @@ public class WeaponSpawner : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void SpawnWeaponServerRpc()
     {
-        Weapon weaponToSpawn = WeaponDataBase.GetRandomWeapon();
-        if(weaponToSpawn != null)
+        float pickupType = Random.value;
+
+        Vector3 spawnPosition = transform.position + spawnOffset;
+
+        pickupInstance = Instantiate(weaponPickupPrefab, spawnPosition, Quaternion.identity);
+        pickupInstance.GetComponent<NetworkObject>().Spawn(true);
+
+        var pickup = pickupInstance.GetComponent<Pickup>();
+
+        if (pickupType < .8)
         {
-            Vector3 spawnPosition = transform.position + spawnOffset;
+            pickup.EnableWeaponClientRpc();
+            Weapon weaponToSpawn = WeaponDataBase.GetRandomWeapon();
 
-            pickupInstance = Instantiate(weaponPickupPrefab, spawnPosition, Quaternion.identity);
-            pickupInstance.GetComponent<NetworkObject>().Spawn(true);
-
-            var pickup = pickupInstance.GetComponent<Pickup>();
-
-            if (pickup != null)
+            if (weaponToSpawn != null)
             {
                 pickupInstance.GetComponent<Pickup>().SetWeaponClientRpc(weaponToSpawn.weaponId);
+                pickup.SetMaterialClientRpc(TextureManager.comGunInd);
             }
         }
+        else if (pickupType < .9)
+        {
+            pickup.EnableHealthClientRpc();
+            float health = Random.value;
+            if(health < .6)
+            {
+                pickup.SetHealthClientRpc(15f);
+                pickup.SetMaterialClientRpc(TextureManager.health1Ind);
+            } else if (health < .9)
+            {
+                pickup.SetHealthClientRpc(30f);
+                pickup.SetMaterialClientRpc(TextureManager.health2Ind);
+            } else
+            {
+                pickup.SetHealthClientRpc(50f);
+                pickup.SetMaterialClientRpc(TextureManager.health3Ind);
+            }
+        } else
+        {
+            pickup.EnablePowerClientRpc();
+            pickup.SetMaterialClientRpc(TextureManager.powerInd);
+        }
+        
     }
 }
