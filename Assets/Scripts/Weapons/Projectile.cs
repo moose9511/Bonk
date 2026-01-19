@@ -44,20 +44,19 @@ public class Projectile : NetworkBehaviour
             return;
 
         transform.Translate(values[2] * Time.deltaTime * direction);
-        colliders = Physics.OverlapSphere(transform.position, values[4]);
-        foreach (Collider hit in colliders)
+        Physics.SphereCast(transform.position, values[4], direction, out RaycastHit hit, values[4]);
+        if (hit.collider == null) return;
+
+        if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
         {
-            if (hit.gameObject.CompareTag("Player") && hit.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
-            {
-                hit.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
-                hit.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
-                networkObject.Despawn();
-            }
-            else if (hit.gameObject.layer == Player.groundLayer)
-            {
-                if(GetComponent<NetworkObject>().IsSpawned)
-                    GetComponent<NetworkObject>().Despawn();
-            }
+            hit.collider.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
+            hit.collider.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
+            networkObject.Despawn();
+        }
+        else if (hit.collider.gameObject.layer == Player.groundLayer)
+        {
+            if(GetComponent<NetworkObject>().IsSpawned)
+                GetComponent<NetworkObject>().Despawn();
         }
     }
 

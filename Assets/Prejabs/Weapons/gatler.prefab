@@ -48,7 +48,7 @@ MonoBehaviour:
   weaponMesh: {fileID: -2432090755550338912, guid: 5a2e0cfd303e4274d97b561fa03cc890, type: 3}
   projPrefab: {fileID: 1636834010344921133, guid: d8d8024accb5d44468361c390d5d4e77, type: 3}
   damage: 3
-  strength: 1
+  strength: 2
   speed: 50
   fireRate: 0.02
   lifeTime: 5

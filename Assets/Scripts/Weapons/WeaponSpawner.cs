@@ -65,7 +65,7 @@ public class WeaponSpawner : NetworkBehaviour
 
         var pickup = pickupInstance.GetComponent<Pickup>();
 
-        if (pickupType < .8)
+        if (pickupType < .65)
         {
             pickup.EnableWeaponClientRpc();
             Weapon weaponToSpawn = WeaponDataBase.GetRandomWeapon();
@@ -76,7 +76,7 @@ public class WeaponSpawner : NetworkBehaviour
                 pickup.SetMaterialClientRpc(TextureManager.comGunInd);
             }
         }
-        else if (pickupType < .9)
+        else if (pickupType < .83)
         {
             pickup.EnableHealthClientRpc();
             float health = Random.value;

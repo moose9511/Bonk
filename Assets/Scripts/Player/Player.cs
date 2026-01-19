@@ -24,6 +24,10 @@ public class Player : NetworkBehaviour
 	[SerializeField] private LayerMask pickupMask;
 	[SerializeField] private LayerMask boundsMask;
 
+	private Coroutine jumpPowerRoutine;
+	private Coroutine speedPowerRoutine;
+	private Coroutine hardPowerRoutine;
+
 	private Transform deadTransform;
 
 	public static int groundLayer;
@@ -115,7 +119,7 @@ public class Player : NetworkBehaviour
     {
 		if(!IsOwner) return;
 
-		if(health.Value < 0)
+		if(health.Value <= 0)
 		{
 			BeDead();
 		} 
@@ -139,18 +143,24 @@ public class Player : NetworkBehaviour
 				GainHealthServerRpc(Mathf.Clamp(pickup.healthGained, 0, 100));
 			} else if (pickup.isPower)
 			{
-				int randPow = Random.Range(1, 4);
+				int randPow = Random.Range(1, 5);
 
 				switch(randPow)
 				{
 					case 1:
-						StartCoroutine(JumpPower(15));
+						if(jumpPowerRoutine != null)
+							StopCoroutine(jumpPowerRoutine);
+						jumpPowerRoutine = StartCoroutine(JumpPower(15));
 						break;
 					case 2:
-						StartCoroutine(SpeedPower(10));
+                        if (speedPowerRoutine != null)
+                            StopCoroutine(speedPowerRoutine);
+                        speedPowerRoutine = StartCoroutine(SpeedPower(10));
 						break;
 					case 3:
-						StartCoroutine(HardPower(50));
+                        if (hardPowerRoutine != null)
+                            StopCoroutine(hardPowerRoutine);
+                        hardPowerRoutine = StartCoroutine(HardPower(50));
 						break;
 					case 4:
 						ExtraHealthPowerServerRpc(200);
@@ -175,7 +185,7 @@ public class Player : NetworkBehaviour
 			if(Input.GetMouseButtonDown(0) && shootTime >= shootInterval)
 			{
 				shootTime = 0;
-                Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit punchHit, 2.5f);
+                Physics.SphereCast(cam.transform.position, .4f, cam.transform.forward, out RaycastHit punchHit, 3.3f);
                 if (punchHit.collider != null && punchHit.collider.CompareTag("Player"))
                 {
 					if (punchHit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId == OwnerClientId) return;
@@ -236,6 +246,7 @@ public class Player : NetworkBehaviour
 	}
     public IEnumerator SpeedPower(float speedPower)
     {
+		StopAllPowers();
         GetComponent<PlayerMovement2>().moveSpeed += speedPower;
         for (int i = 25; i > 0; i--)
         {
@@ -297,7 +308,7 @@ public class Player : NetworkBehaviour
 		currentWeapon = null;
 		gunPointer.SetActive(false);
 
-		StopAllCoroutines();
+		StopAllPowers();
 
 		ammo = -1;
 
@@ -349,6 +360,15 @@ public class Player : NetworkBehaviour
 		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
 
+	public void StopAllPowers()
+	{
+		if(jumpPowerRoutine != null)
+			StopCoroutine(jumpPowerRoutine);
+        if (speedPowerRoutine != null)
+            StopCoroutine(speedPowerRoutine);
+        if (hardPowerRoutine != null)
+            StopCoroutine(hardPowerRoutine);
+	}
 	public void SetState(string state)
 	{
 		if (!IsOwner) return;

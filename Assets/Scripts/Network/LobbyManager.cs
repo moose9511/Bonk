@@ -45,7 +45,7 @@ public class LobbyManager : Singleton<LobbyManager>
         if (UnityServices.State != ServicesInitializationState.Initialized)
             await UnityServices.InitializeAsync(initOptions);
 
-        //AuthenticationService.Instance.ClearSessionToken();
+        AuthenticationService.Instance.ClearSessionToken();
         if (!AuthenticationService.Instance.IsSignedIn)
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         imReadyForYou = true;
