@@ -50,11 +50,11 @@ MonoBehaviour:
   damage: 35
   strength: 20
   speed: 130
-  fireRate: 0.8
+  fireRate: 0.5
   lifeTime: 7
   radius: 0.4
   ammo: 20
-  isAutomatic: 1
+  isAutomatic: 0
   weaponId: 4
   clientOwnerId: 0
   distanceToShooter: 1.2

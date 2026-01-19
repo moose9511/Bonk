@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using Unity.Netcode;
 using Unity.VisualScripting;
@@ -214,7 +215,7 @@ public class Player : NetworkBehaviour
 			if (shoot)
 			{
 				float[] values = currentWeapon.SerializeData(cam.transform.forward);
-				SpawnProjServerRpc(values, currentWeapon.weaponId);
+				SpawnProjRpc(values, currentWeapon.weaponId);
 				shootTime = 0;
 
 				Ammo -= 1;
@@ -349,6 +350,26 @@ public class Player : NetworkBehaviour
 		projObj.transform.localScale = new Vector3(shotWeaon.radius, shotWeaon.radius, shotWeaon.radius);
 
 		projObj.GetComponent<NetworkObject>().Spawn();
+		var proj = projObj.AddComponent<Projectile>();
+
+		proj.Init(values);
+	}
+
+	[Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Everyone)]
+	public void SpawnProjRpc(float[] values, int weaponId)
+	{
+		SpawnProjClientRpc(values, weaponId);
+	}
+
+	[ClientRpc]
+	public void SpawnProjClientRpc(float[] values, int weaponId)
+	{
+		Weapon shotWeaon = WeaponDataBase.GetWeaponById(weaponId);
+		var projObj = Instantiate(shotWeaon.projPrefab,
+		cam.transform.position + cam.transform.forward * shotWeaon.distanceToShooter,
+		Quaternion.identity);
+		projObj.transform.localScale = new Vector3(shotWeaon.radius, shotWeaon.radius, shotWeaon.radius);
+
 		var proj = projObj.AddComponent<Projectile>();
 
 		proj.Init(values);

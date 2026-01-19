@@ -21,6 +21,8 @@ public class Projectile : NetworkBehaviour
 
     private Vector3 direction;
     private NetworkObject networkObject;
+
+	private Vector3 lastPos;
     private IEnumerator die()
     {
         yield return new WaitForSeconds(values[3]);
@@ -34,30 +36,67 @@ public class Projectile : NetworkBehaviour
         direction = new Vector3(values[5], values[6], values[7]);
 
 		networkObject = GetComponent<NetworkObject>();
+		lastPos = transform.position;
 
 		StartCoroutine(die());
     }
 
     void Update()
     {
-        if (values == null || values.Length == 0)
-            return;
+		ClientUpdate();
+    }
 
-        transform.Translate(values[2] * Time.deltaTime * direction);
-        Physics.SphereCast(transform.position, values[4], direction, out RaycastHit hit, values[4]);
-        if (hit.collider == null) return;
+    private void ServerUpdate()
+    {
+		if (values == null || values.Length == 0)
+			return;
 
-        if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
-        {
-            hit.collider.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
-            hit.collider.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
-            networkObject.Despawn();
-        }
-        else if (hit.collider.gameObject.layer == Player.groundLayer)
-        {
-            if(GetComponent<NetworkObject>().IsSpawned)
-                GetComponent<NetworkObject>().Despawn();
-        }
+		transform.Translate(values[2] * Time.deltaTime * direction);
+
+		Vector3 newPosition = transform.position + direction * values[2] * Time.deltaTime; 
+		float distance = Vector3.Distance(lastPos, newPosition);
+
+		Physics.SphereCast(transform.position, values[4], direction, out RaycastHit hit, distance);
+		if (hit.collider == null) return;
+
+		if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
+		{
+			hit.collider.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
+			hit.collider.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
+			networkObject.Despawn();
+		}
+		else if (hit.collider.gameObject.layer == Player.groundLayer)
+		{
+			if (GetComponent<NetworkObject>().IsSpawned)
+				GetComponent<NetworkObject>().Despawn();
+		}
+	}
+
+    private void ClientUpdate()
+    {
+		if (values == null || values.Length == 0)
+			return;
+
+		Physics.SphereCast(transform.position, values[4], direction, out RaycastHit hit, 0);
+		transform.Translate(values[2] * Time.deltaTime * direction);
+		if (hit.collider == null) return;
+
+		if (hit.collider.gameObject.CompareTag("Player") && hit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId != values[8])
+		{
+			hit.collider.GetComponent<PlayerMovement2>()?.AddForceRpc(direction * values[1]);
+			hit.collider.GetComponent<Player>()?.TakeDamageServerRpc(values[0]);
+			Destroy(gameObject);
+		}
+		else if (hit.collider.gameObject.layer == Player.groundLayer)
+		{
+			Destroy(gameObject);
+		}
+	}
+	 
+    private void OnDrawGizmos()
+    {
+		Gizmos.DrawWireSphere(transform.position, values[4]);
+		
     }
 
 }
