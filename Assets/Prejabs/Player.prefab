@@ -516,6 +516,7 @@ GameObject:
   - component: {fileID: 3716029460672619465}
   - component: {fileID: 3266946542563700516}
   - component: {fileID: 6574382992032333539}
+  - component: {fileID: 496775604075706215}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -649,6 +650,7 @@ MonoBehaviour:
   hitThreshold: 4
   hitMult: 1
   extraForce: {x: 0, y: 0, z: 0}
+  col: {fileID: 496775604075706215}
 --- !u!114 &3716029460672619465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -724,6 +726,29 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!136 &496775604075706215
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714127207263417080}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.44
+  m_Height: 1.93
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.28, z: 0}
 --- !u!1 &2058997826542351564
 GameObject:
   m_ObjectHideFlags: 0

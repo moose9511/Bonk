@@ -22,7 +22,12 @@ public class Projectile : NetworkBehaviour
     private Vector3 direction;
     private NetworkObject networkObject;
 
+    // for client use
 	private Vector3 lastPos;
+    private bool isVisual = false;
+    private float speed;
+    private ulong networkId;
+
     private IEnumerator die()
     {
         yield return new WaitForSeconds(values[3]);
@@ -41,11 +46,21 @@ public class Projectile : NetworkBehaviour
 		StartCoroutine(die());
     }
 
+    public void Init(float speed, Vector3 position, Vector3 direction, ulong networkId)
+    {
+        isVisual = true;
+        transform.position = position;
+        this.direction = direction;
+        this.speed = speed;
+        this.networkId = networkId;
+    }
+
     void Update()
     {
-        if(IsServer)
-		ServerUpdate();
-        ClientUpdate();
+        if(IsServer && !isVisual)
+		    ServerUpdate();
+        else if (isVisual)
+            ClientUpdate();
     }
 
     private void ServerUpdate()
@@ -53,10 +68,10 @@ public class Projectile : NetworkBehaviour
 		if (values == null || values.Length == 0)
 			return;
 
-		transform.Translate(values[2] * Time.deltaTime * direction);
+        lastPos = transform.position;
+        transform.Translate(values[2] * Time.deltaTime * direction);
 
-		Vector3 newPosition = transform.position + direction * values[2] * Time.deltaTime; 
-		float distance = Vector3.Distance(lastPos, newPosition);
+		float distance = Vector3.Distance(lastPos, transform.position);
 
 		Physics.SphereCast(transform.position, values[4], direction, out RaycastHit hit, distance);
 		if (hit.collider == null) return;
@@ -72,18 +87,24 @@ public class Projectile : NetworkBehaviour
 			if (GetComponent<NetworkObject>().IsSpawned)
 				GetComponent<NetworkObject>().Despawn();
 		}
-	}
+    }
 
     private void ClientUpdate()
     {
-        if(!IsClient || IsServer) return;
-		transform.position += direction * values[2] * Time.deltaTime;
-	}
-	 
+        transform.Translate(speed * Time.deltaTime * direction);
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(networkId))
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+    }
+            
+
     private void OnDrawGizmos()
     {
-		Gizmos.DrawWireSphere(transform.position, values[4]);
-		
+		if(values != null)
+            Gizmos.DrawWireSphere(transform.position, values[4]);
     }
 
 }

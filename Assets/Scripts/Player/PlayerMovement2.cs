@@ -27,12 +27,11 @@ public class PlayerMovement2 : NetworkBehaviour
 
     private Vector3 lastMove = new(1, 0, 1);
     private Vector3 movement;
-    private Collider col;
+    [SerializeField] private Collider col;
     private Player player;
 
     public override void OnNetworkSpawn()
     {
-        col = GetComponent<Collider>();
         player = GetComponent<Player>();
 
     }
@@ -173,7 +172,7 @@ public class PlayerMovement2 : NetworkBehaviour
             {
                 extraForce = Vector3.zero;
             }
-        } else if (angle < 90f && angle > 40f)
+        } else if (angle < 90f && angle > 30f)
         {
             Vector3 slopeDirection = Vector3.ProjectOnPlane(extraForce, groundNormal);
             if (slopeDirection.y < gravity)
@@ -188,6 +187,7 @@ public class PlayerMovement2 : NetworkBehaviour
         }
         else
             isGrounded = false;
+
     }
 
     // handles jump and gravity application

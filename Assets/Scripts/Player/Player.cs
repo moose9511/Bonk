@@ -96,14 +96,14 @@ public class Player : NetworkBehaviour
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void TakeDamageServerRpc(float damage)
 	{
-		Debug.Log("take damage");
 		health.Value = Mathf.Max(0, health.Value - damage);
 	}
 
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void GainHealthServerRpc(float heal)
 	{
-		health.Value = Mathf.Min(100f, health.Value + heal);
+		if(health.Value > 100f) return;
+        health.Value = Mathf.Min(100f, health.Value + heal);
 	}
 	
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -146,21 +146,20 @@ public class Player : NetworkBehaviour
 			{
 				int randPow = Random.Range(1, 5);
 
-				switch(randPow)
+				Debug.Log("Powerup: " + randPow);
+
+				switch (randPow)
 				{
 					case 1:
-						if(jumpPowerRoutine != null)
-							StopCoroutine(jumpPowerRoutine);
-						jumpPowerRoutine = StartCoroutine(JumpPower(15));
+                        StopAllPowers(speed: false, hard: false);
+                        jumpPowerRoutine = StartCoroutine(JumpPower(15));
 						break;
 					case 2:
-                        if (speedPowerRoutine != null)
-                            StopCoroutine(speedPowerRoutine);
-                        speedPowerRoutine = StartCoroutine(SpeedPower(10));
+						StopAllPowers(jump: false, hard: false);
+                        speedPowerRoutine = StartCoroutine(SpeedPower(8));
 						break;
 					case 3:
-                        if (hardPowerRoutine != null)
-                            StopCoroutine(hardPowerRoutine);
+                        StopAllPowers(speed: false, jump: false);
                         hardPowerRoutine = StartCoroutine(HardPower(50));
 						break;
 					case 4:
@@ -170,6 +169,7 @@ public class Player : NetworkBehaviour
 			}
 
 			pickup.DieServerRpc();
+			Destroy(pickup.gameObject);
 		}
 
         Collider[] outOfBounds = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, boundsMask);
@@ -247,7 +247,6 @@ public class Player : NetworkBehaviour
 	}
     public IEnumerator SpeedPower(float speedPower)
     {
-		StopAllPowers();
         GetComponent<PlayerMovement2>().moveSpeed += speedPower;
         for (int i = 25; i > 0; i--)
         {
@@ -344,36 +343,33 @@ public class Player : NetworkBehaviour
 	public void SpawnProjServerRpc(float[] values, int weaponId)
 	{
 		Weapon shotWeaon = WeaponDataBase.GetWeaponById(weaponId);
+
         var projObj = Instantiate(shotWeaon.projPrefab,
         cam.transform.position + cam.transform.forward * shotWeaon.distanceToShooter,
         Quaternion.identity);
-		projObj.transform.localScale = new Vector3(shotWeaon.radius, shotWeaon.radius, shotWeaon.radius);
 
-		projObj.GetComponent<NetworkObject>().Spawn();
-		var proj = projObj.AddComponent<Projectile>();
+		var network = projObj.GetComponent<NetworkObject>();
+		network.Spawn();
+        SpawnVisualProjClientRpc(weaponId, cam.transform.position, cam.transform.forward, network.NetworkObjectId);
+        var proj = projObj.GetComponent<Projectile>();
 
 		proj.Init(values);
-	}
-
-	[Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Everyone)]
-	public void SpawnProjRpc(float[] values, int weaponId)
-	{
-		SpawnProjClientRpc(values, weaponId);
 	}
 
 	[ClientRpc]
-	public void SpawnProjClientRpc(float[] values, int weaponId)
+	public void SpawnVisualProjClientRpc(int weaponId, Vector3 position, Vector3 lookDir, ulong networkId)
 	{
-		Weapon shotWeaon = WeaponDataBase.GetWeaponById(weaponId);
+        Weapon shotWeaon = WeaponDataBase.GetWeaponById(weaponId);
 		var projObj = Instantiate(shotWeaon.projPrefab,
-		cam.transform.position + cam.transform.forward * shotWeaon.distanceToShooter,
+		position + lookDir * shotWeaon.distanceToShooter,
 		Quaternion.identity);
-		projObj.transform.localScale = new Vector3(shotWeaon.radius, shotWeaon.radius, shotWeaon.radius);
 
-		var proj = projObj.AddComponent<Projectile>();
+        projObj.GetComponent<Renderer>().enabled = true;
 
-		proj.Init(values);
-	}
+        projObj.transform.localScale = new Vector3(shotWeaon.radius * 2, shotWeaon.radius * 2, shotWeaon.radius * 2);
+
+        projObj.GetComponent<Projectile>().Init(shotWeaon.speed, position, lookDir, networkId);
+    }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void SetWeaponServerRpc(int weaponId)
@@ -381,15 +377,25 @@ public class Player : NetworkBehaviour
 		currentWeapon = WeaponDataBase.GetWeaponById(weaponId);
 	}
 
-	public void StopAllPowers()
+	public void StopAllPowers(bool jump = true, bool speed = true, bool hard = true)
 	{
-		if(jumpPowerRoutine != null)
-			StopCoroutine(jumpPowerRoutine);
-        if (speedPowerRoutine != null)
+		powerText.text = "";
+        if(jumpPowerRoutine != null && jump)
+		{
+            StopCoroutine(jumpPowerRoutine);
+			GetComponent<PlayerMovement2>().jumpSpeed = 6f;
+        }
+        if (speedPowerRoutine != null && speed)
+        {
             StopCoroutine(speedPowerRoutine);
-        if (hardPowerRoutine != null)
+            GetComponent<PlayerMovement2>().moveSpeed = 10f;
+        }
+        if (hardPowerRoutine != null && hard)
+        {
             StopCoroutine(hardPowerRoutine);
-	}
+			GetComponent<PlayerMovement2>().hitThreshold = 4;
+        }
+    }
 	public void SetState(string state)
 	{
 		if (!IsOwner) return;
