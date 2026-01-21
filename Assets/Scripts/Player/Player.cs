@@ -78,8 +78,9 @@ public class Player : NetworkBehaviour
 			{
 				canvas.SetActive(false);
 			}
-			else
+			else if (SceneManager.GetActiveScene().name == "map1")
 			{
+				Debug.Log("Starting animations for player client");	
 				canvas.SetActive(true);
 			}
 				
@@ -87,6 +88,13 @@ public class Player : NetworkBehaviour
 
     }
 
+	[ClientRpc]
+	public void StartAnimationsClientRpc()
+	{
+		Debug.Log("StartAnimationsClientRpc called");
+		StartCoroutine(AnimationManager.StartAnimations());
+
+	}
 	private void OnHealthChanged(float oldValue, float newValue)
 	{
 		if (IsOwner)

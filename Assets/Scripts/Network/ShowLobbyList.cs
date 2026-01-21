@@ -49,7 +49,9 @@ public class ShowLobbyList : MonoBehaviour
                 if (lobbyScrollView == null) return;
 
                 lobby.Data.TryGetValue("JoinCode", out var joinCodeData);
-                if (joinCodeData == null || joinCodeData.Equals(""))
+                lobby.Data.TryGetValue("Waiting", out var waitingData);
+                Debug.Log(waitingData + "---------------------------");
+				if (joinCodeData == null || joinCodeData.Equals("") || waitingData == null || waitingData.Equals("false"))
                 {
                     return;
                 }

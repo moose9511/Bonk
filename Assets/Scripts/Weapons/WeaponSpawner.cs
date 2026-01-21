@@ -23,7 +23,6 @@ public class WeaponSpawner : NetworkBehaviour
         base.OnNetworkSpawn();
         if(weaponPickupPrefab == null)
         {
-            Debug.Log("Weapon pickup prefab is not assigned in WeaponSpawner.");
             enabled = false;
             return;
         }
@@ -65,7 +64,7 @@ public class WeaponSpawner : NetworkBehaviour
 
         var pickup = pickupInstance.GetComponent<Pickup>();
 
-        if (pickupType < .01f/*.65*/)
+        if (pickupType < .65)
         {
             pickup.EnableWeaponClientRpc();
             Weapon weaponToSpawn = WeaponDataBase.GetRandomWeapon();
@@ -76,7 +75,7 @@ public class WeaponSpawner : NetworkBehaviour
                 pickup.SetMaterialClientRpc(TextureManager.comGunInd);
             }
         }
-        else if (pickupType < .01f/*.83*/)
+        else if (pickupType < .83)
         {
             pickup.EnableHealthClientRpc();
             float health = Random.value;
