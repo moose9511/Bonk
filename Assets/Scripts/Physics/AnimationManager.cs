@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AnimationManager : MonoBehaviour
 {
+	[SerializeField] private Material sandMat;
     public Animator[] animators;
 	public static Dictionary<int, Animator> _animators = new Dictionary<int, Animator>();
 
@@ -23,4 +24,5 @@ public class AnimationManager : MonoBehaviour
 			entry.Value.Play("Base Layer.Animation", -1, 0f);
 		}
 	}
+
 }

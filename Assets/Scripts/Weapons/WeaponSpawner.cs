@@ -81,15 +81,15 @@ public class WeaponSpawner : NetworkBehaviour
             float health = Random.value;
             if(health < .6)
             {
-                pickup.SetHealthClientRpc(15f);
+                pickup.SetHealthClientRpc(25f);
                 pickup.SetMaterialClientRpc(TextureManager.health1Ind);
             } else if (health < .9)
             {
-                pickup.SetHealthClientRpc(30f);
+                pickup.SetHealthClientRpc(40f);
                 pickup.SetMaterialClientRpc(TextureManager.health2Ind);
             } else
             {
-                pickup.SetHealthClientRpc(50f);
+                pickup.SetHealthClientRpc(70f);
                 pickup.SetMaterialClientRpc(TextureManager.health3Ind);
             }
         } else

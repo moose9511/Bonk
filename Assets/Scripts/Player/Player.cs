@@ -20,7 +20,7 @@ public class Player : NetworkBehaviour
 	[SerializeField] private Button respawnBtn;
 	[SerializeField] private GameObject gunPointer;
 
-    [SerializeField] private GameObject cam;
+	[SerializeField] private GameObject cam;
 
 	[SerializeField] private LayerMask pickupMask;
 	[SerializeField] private LayerMask boundsMask;
@@ -51,22 +51,22 @@ public class Player : NetworkBehaviour
 	[SerializeField] private MeshFilter filter;
 
 	// health
-    private NetworkVariable<float> health = new(
+	private NetworkVariable<float> health = new(
 		100f, NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 	private NetworkVariable<int> weaponId = new(
 		-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
 	public Weapon currentWeapon = null;
 
-    public override void OnNetworkSpawn()
-    {
-		
+	public override void OnNetworkSpawn()
+	{
+
 		base.OnNetworkSpawn();
-        // sets ground layer
-        groundLayer = LayerMask.NameToLayer("Ground");
+		// sets ground layer
+		groundLayer = LayerMask.NameToLayer("Ground");
 
 		// sets correct canvas for each player
-		if (!IsOwner) { 
+		if (!IsOwner) {
 			canvas.SetActive(false);
 		}
 		else
@@ -80,13 +80,13 @@ public class Player : NetworkBehaviour
 			}
 			else if (SceneManager.GetActiveScene().name == "map1")
 			{
-				Debug.Log("Starting animations for player client");	
+				Debug.Log("Starting animations for player client");
 				canvas.SetActive(true);
 			}
-				
+
 		}
 
-    }
+	}
 
 	[ClientRpc]
 	public void StartAnimationsClientRpc()
@@ -110,28 +110,33 @@ public class Player : NetworkBehaviour
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void GainHealthServerRpc(float heal)
 	{
-		if(health.Value > 100f) return;
-        health.Value = Mathf.Min(100f, health.Value + heal);
+		if (health.Value > 100f) return;
+		health.Value = Mathf.Min(100f, health.Value + heal);
 	}
-	
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+	public void SetHealthServerRpc(float heal)
+	{
+		health.Value = heal;
+	}
+
 	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
 	public void DIEFOOLServerRpc(ulong clientId)
 	{
-		if(OwnerClientId == clientId)
+		if (OwnerClientId == clientId)
 		{
 			transform.position = new Vector3(-99999999, -99999999, -99999999);
-        }
-			
+		}
+
 	}
 
-    public void Update()
-    {
-		if(!IsOwner) return;
+	public void Update()
+	{
+		if (!IsOwner) return;
 
-		if(health.Value <= 0)
+		if (health.Value <= 0)
 		{
 			BeDead();
-		} 
+		}
 
 		// checks to see if player has collided with a pickup
 		Collider[] pickups = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, pickupMask);
@@ -139,15 +144,16 @@ public class Player : NetworkBehaviour
 		{
 			Pickup pickup = coll.gameObject.GetComponent<Pickup>();
 
-			if(pickup.isWeapon)
+			if (pickup.isWeapon)
 			{
-                currentWeapon = pickup.weapon;
-                currentWeapon.clientOwnerId = (int)OwnerClientId;
-                Ammo = pickup.weapon.ammo;
+				currentWeapon = pickup.weapon;
+				currentWeapon.clientOwnerId = (int)OwnerClientId;
+				Ammo = pickup.weapon.ammo;
+                SetWeaponChildServerRpc(currentWeapon.weaponId);
 
                 shootInterval = currentWeapon.fireRate;
-                shootTime = shootInterval;
-            } else if (pickup.isHealth)
+				shootTime = shootInterval;
+			} else if (pickup.isHealth)
 			{
 				GainHealthServerRpc(Mathf.Clamp(pickup.healthGained, 0, 100));
 			} else if (pickup.isPower)
@@ -159,16 +165,16 @@ public class Player : NetworkBehaviour
 				switch (randPow)
 				{
 					case 1:
-                        StopAllPowers(speed: false, hard: false);
-                        jumpPowerRoutine = StartCoroutine(JumpPower(15));
+						StopAllPowers(speed: false, hard: false);
+						jumpPowerRoutine = StartCoroutine(JumpPower(15));
 						break;
 					case 2:
 						StopAllPowers(jump: false, hard: false);
-                        speedPowerRoutine = StartCoroutine(SpeedPower(8));
+						speedPowerRoutine = StartCoroutine(SpeedPower(8));
 						break;
 					case 3:
-                        StopAllPowers(speed: false, jump: false);
-                        hardPowerRoutine = StartCoroutine(HardPower(50));
+						StopAllPowers(speed: false, jump: false);
+						hardPowerRoutine = StartCoroutine(HardPower(50));
 						break;
 					case 4:
 						ExtraHealthPowerServerRpc(200);
@@ -180,33 +186,33 @@ public class Player : NetworkBehaviour
 			Destroy(pickup.gameObject);
 		}
 
-        Collider[] outOfBounds = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, boundsMask);
-		if(outOfBounds.Length > 0)
+		Collider[] outOfBounds = Physics.OverlapCapsule(transform.position + new Vector3(0, .5f, 0), transform.position - new Vector3(0, .5f, 0), .6f, boundsMask);
+		if (outOfBounds.Length > 0)
 		{
 			BeDead();
 		}
 
-        if (currentWeapon == null) 
+		if (currentWeapon == null)
 		{
 			filter.mesh = null;
 			Ammo = 0;
 
-			if(Input.GetMouseButtonDown(0) && shootTime >= shootInterval)
+			if (Input.GetMouseButtonDown(0) && shootTime >= shootInterval)
 			{
 				shootTime = 0;
-                Physics.SphereCast(cam.transform.position, .4f, cam.transform.forward, out RaycastHit punchHit, 3.3f);
-                if (punchHit.collider != null && punchHit.collider.CompareTag("Player"))
-                {
+				Physics.SphereCast(cam.transform.position, .4f, cam.transform.forward, out RaycastHit punchHit, 3.3f);
+				if (punchHit.collider != null && punchHit.collider.CompareTag("Player"))
+				{
 					if (punchHit.collider.gameObject.GetComponent<NetworkObject>().OwnerClientId == OwnerClientId) return;
 
-                    punchHit.collider.gameObject.GetComponent<Player>().TakeDamageServerRpc(2);
-                    punchHit.collider.gameObject.GetComponent<PlayerMovement2>().AddForceRpc(cam.transform.forward * 20);
-                }
-            }
-            if (shootTime < shootInterval)
-                shootTime += Time.deltaTime;
+					punchHit.collider.gameObject.GetComponent<Player>().TakeDamageServerRpc(2);
+					punchHit.collider.gameObject.GetComponent<PlayerMovement2>().AddForceRpc(cam.transform.forward * 20);
+				}
+			}
+			if (shootTime < shootInterval)
+				shootTime += Time.deltaTime;
 
-            return;
+			return;
 		} else
 		{
 			filter.mesh = currentWeapon.weaponMesh;
@@ -215,7 +221,7 @@ public class Player : NetworkBehaviour
 		if (shootTime >= shootInterval)
 		{
 			bool shoot = false;
-			if(currentWeapon.isAutomatic)
+			if (currentWeapon.isAutomatic)
 				shoot = Input.GetMouseButton(0);
 			else
 				shoot = Input.GetMouseButtonDown(0);
@@ -230,18 +236,33 @@ public class Player : NetworkBehaviour
 				if (Ammo <= 0)
 				{
 					currentWeapon = null;
-				}
+					SetWeaponChildServerRpc(-1);
+                }
 			}
 		}
 		else
 		{
-			if(shootTime < shootInterval)
+			if (shootTime < shootInterval)
 				shootTime += Time.deltaTime;
 		}
-				
+
+	}
+
+	[Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void SetWeaponChildServerRpc(int weaponId)
+	{
+		SetWeaponChildClientRpc(weaponId);
+    }
+	[ClientRpc]
+	public void SetWeaponChildClientRpc(int weaponId)
+	{
+		if (weaponId == -1)
+			filter.mesh = null;
+		else
+			filter.mesh = WeaponDataBase.GetWeaponById(weaponId).weaponMesh;
     }
 
-	public IEnumerator JumpPower(float jumpPower)
+    public IEnumerator JumpPower(float jumpPower)
 	{
 		GetComponent<PlayerMovement2>().jumpSpeed += jumpPower;
 		for(int i = 40; i > 0; i--)
@@ -328,7 +349,7 @@ public class Player : NetworkBehaviour
 
 	public void Respawn()
 	{
-        GainHealthServerRpc(100);
+        SetHealthServerRpc(100);
 		ammoCount.enabled = true;
 		healthText.enabled = true;
 		respawnBtn.gameObject.SetActive(false);
